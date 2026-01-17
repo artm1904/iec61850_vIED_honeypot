@@ -74,6 +74,8 @@ endif()
 # ------------------------------------------------------------------------------
 set(open_server_SRCS
     utils/string_utilities.c
+    utils/mms_utilities.c
+    
     input/inputs.c
     model/config_file_parser_extensions.c
     model/dynamic_model_extensions.c

@@ -2,6 +2,7 @@
 #define DSP_H_
 
 #include "iec61850_model_extensions.h"
+#include "mms_utilities.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -35,6 +36,7 @@ typedef struct sDSP
 {
     IedServer server;
     InputEntry *extRefs;
+    bool DORef;
 
     ValueUpdateEntryArray *da_phs_list;  // linked list of value references
     ValueUpdateEntryArray *da_phsAng_list;  // linked list of value references
@@ -58,8 +60,8 @@ typedef void (*DSP_ProcessFunc)(void *);
 //register these default functions
 extern void *init_dft();
 extern void *init_rms();
-extern void CALC_I_DFT(void * dsp);
-extern void CALC_U_RMS(void * dsp);
+extern void CALC_DFT(void * dsp);
+extern void CALC_RMS(void * dsp);
 
 // FUNCTIONS CALLABLE BY PLUGINS TO OVERWRITE DSP PROCESSING
 //overwrite the used callback
@@ -88,6 +90,7 @@ void DSP_processing_callback(InputEntry *extRef);
 
 // FUNCTIONS FOR THE DSP TO CALL DURING PROCESSING
 // update values and registered callbacks (called from DSP function)
+void getDSPValueFromMMS(DSP * dsp, void * mmsval, void * ref, ctype reftype); //to decode unique SMV-LE type DO structure and DA types based on extref type
 void updateDataValues_Average(DSP * dsp, double amplitude);
 void updateDataValues_Amp(DSP * dsp, uint32_t i, double amplitude);
 void updateDataValues_Angle(DSP * dsp, uint32_t i, double angle);
@@ -103,4 +106,4 @@ double DSP_get_Average(DSP *dsp);
 }
 #endif
 
-#endif /* LNS_H_ */
+#endif /* DSP_H_ */

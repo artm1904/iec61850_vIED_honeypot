@@ -1,6 +1,7 @@
 #include "iec61850_model_extensions.h"
 #include "inputs_api.h"
 #include "dsp.h"
+#include "mms_utilities.h"
 #include <math.h>
 
 extern const double INTERESTED_FREQ;
@@ -42,7 +43,8 @@ void * init_dft()
     return inst;
 }
 
-void CALC_I_DFT(void * dsp)
+
+void CALC_DFT(void * dsp)
 {
   DSP *dsp_inst = dsp;
   DFT * inst = dsp_inst->dsp_data;
@@ -63,11 +65,16 @@ void CALC_I_DFT(void * dsp)
         if(inst->variant == EVERY_WINDOW_SIZE)//calculate dft every WINDOW_SIZE (e.g. 80) cycles. this means low latency, but the values are updated only once per cycle
         {
           double multiplier = 0.5 * (1 - cos( 2 * M_PI * inst->sample_index / WINDOW_SIZE));//Hanning window
-          inst->Xr[i] = (inst->Xr[i] +  MmsValue_toInt32(extRef->value) * multiplier * cos(2 * M_PI * k * (double)inst->sample_index / WINDOW_SIZE));
-          inst->Xi[i] = (inst->Xi[i] -  MmsValue_toInt32(extRef->value) * multiplier * sin(2 * M_PI * k * (double)inst->sample_index / WINDOW_SIZE));
+
+          double vv = 0;
+          getDSPValueFromMMS(dsp, extRef->value,&vv, DOUBLE);
+          inst->Xr[i] = (inst->Xr[i] +  vv * multiplier * cos(2 * M_PI * k * (double)inst->sample_index / WINDOW_SIZE));
+          inst->Xi[i] = (inst->Xi[i] -  vv * multiplier * sin(2 * M_PI * k * (double)inst->sample_index / WINDOW_SIZE));
+
           //k * (SAMPLE_FREQ / WINDOW_SIZE), Xr/WINDOW_SIZE, Xi/WINDOW_SIZE, amplitude/(WINDOW_SIZE)*4, angle);
           if ((inst->sample_index % WINDOW_SIZE) == WINDOW_SIZE-1) // we calculate the dft vector after WINDOW_SIZE samples
           {
+            //printf("dft: %s= %d\n",extRef->Ref, MmsValue_toInt32(extRef->value));
             if(i < 3)
             {
               //calculate neutral by adding other vectors
@@ -97,7 +104,9 @@ void CALC_I_DFT(void * dsp)
         {
           double Xr =0, Xi = 0;
             int n;
-            inst->xn[i][inst->sample_index] = MmsValue_toInt32(extRef->value);
+            double vv = 0;
+            getValueFromMMS(extRef->value,&vv, DOUBLE);
+            inst->xn[i][inst->sample_index] = vv;//MmsValue_toInt32(extRef->value);
         
             for (n = 0; n < WINDOW_SIZE; n++) { //calculate 1 cycle(WINDOW_SIZE samples)
             double multiplier = 0.5 * (1 - cos( 2 * M_PI *n / WINDOW_SIZE));//Hanning window

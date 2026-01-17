@@ -1,6 +1,7 @@
 #include "iec61850_model_extensions.h"
 #include "inputs_api.h"
 #include "dsp.h"
+#include "mms_utilities.h"
 #include <math.h>
 
 extern const double INTERESTED_FREQ;
@@ -11,8 +12,7 @@ const double const_Rms = 0.7071;
 typedef struct sRMS
 {
     float RMS[4];
-    int RMS_samplecountV;
-    int RMS_samplecountI;
+    int RMS_samplecount;
 
 } RMS;
 
@@ -21,58 +21,11 @@ void *init_rms()
     RMS *inst = (RMS *)malloc(sizeof(RMS)); // create new instance with MALLOC
     if(inst == NULL) return NULL;
 
-    inst->RMS_samplecountI = 0;
-    inst->RMS_samplecountV = 0;
+    inst->RMS_samplecount = 0;
     return inst;
 }
 
-
-
-void CALC_U_RMS(void * dsp)
-{
-  DSP *dsp_inst = dsp;
-  RMS * inst = dsp_inst->dsp_data;
-
-  InputEntry *extRef = dsp_inst->extRefs; // start from the first extref, and check all values, we assume there are 8!
-  int i = 0;
-  float v;
-  while (extRef != NULL)
-  {
-    if (extRef->value != NULL)
-    {
-      if (i < 4)
-      {
-        if ((inst->RMS_samplecountV % 80) == 0) // every 80 samples we start fresh
-        {
-          inst->RMS[i] = 0; // start over
-        }
-        // calculate RMS value TODO: check correct amount of elements instead of assuming 4, and offload this into a separate thread
-        // currently, it is called each time a sampled-value is updated which might become slow
-        float ff = (float)MmsValue_toInt32(extRef->value);
-        inst->RMS[i] += (ff * ff);
-
-        if ((inst->RMS_samplecountV % 80) == 79) // we calculate the average after 80 samples
-        {
-          inst->RMS[i] /= 80;
-          inst->RMS[i] = sqrt(inst->RMS[i]);
-
-          updateDataValues_Amp(dsp, i, inst->RMS[i]);
-
-          if (i == 3)
-          {
-            v = (inst->RMS[0] + inst->RMS[1] + inst->RMS[2]) / 3;
-            updateDataValues_Average(dsp, v);
-          }
-        }
-      }
-      i++;
-    }
-    extRef = extRef->sibling;
-  }
-  inst->RMS_samplecountV++;
-}
-
-void CALC_I_RMS(void * dsp)
+void CALC_RMS(void * dsp)
 {
   DSP *dsp_inst = dsp;
   RMS * inst = dsp_inst->dsp_data;
@@ -87,13 +40,15 @@ void CALC_I_RMS(void * dsp)
     {
       if (i < 4)
       {
-        if ((inst->RMS_samplecountI % 80) == 0) // every 80 samples we start fresh
+        if ((inst->RMS_samplecount % 80) == 0) // every 80 samples we start fresh
         {
           inst->RMS[i] = 0; // start over
         }
-        // calculate RMS value TODO: check correct amount of elements instead of assuming 8, and offload this into a separate thread
+        // calculate RMS value
         // currently, it is called each time a sampled-value is updated which might become slow
-        peakval[i] = MmsValue_toInt32(extRef->value);
+        int32_t pp = 0;//(float)MmsValue_toInt32(extRef->value);
+        getDSPValueFromMMS(dsp, extRef->value,&pp, INT32);
+        peakval[i] = pp;//MmsValue_toInt32(extRef->value);
         float ff = (float)peakval[i];
         inst->RMS[i] += (ff * ff);
 
@@ -103,13 +58,10 @@ void CALC_I_RMS(void * dsp)
           {
             peakval[i] = peakval[0] + peakval[1] + peakval[2];
             inst->RMS[i] = (float)(peakval[i] * peakval[i]);
-            // printf("+null: %i\n",peakval[i]);
           }
-          // else
-          // printf("_null: %i\n",peakval[i]);
         }
 
-        if ((inst->RMS_samplecountI % 80) == 79) // we calculate the average after 80 samples
+        if ((inst->RMS_samplecount % 80) == 79) // we calculate the average after 80 samples
         {
           inst->RMS[i] /= 80;
           inst->RMS[i] = sqrt(inst->RMS[i]);
@@ -128,5 +80,5 @@ void CALC_I_RMS(void * dsp)
     }
     extRef = extRef->sibling;
   }
-  inst->RMS_samplecountI++;
+  inst->RMS_samplecount++;
 }
