@@ -40,7 +40,6 @@ void PTOC_callback_GOOSE(InputEntry *extRef)
 void PTOC_callback_SMV(void *ptoc_inst)
 {
   PTOC *inst = ptoc_inst;
-  InputEntry *extRef = inst->input->extRefs; // start from the first extref, and check all values
   int i = 0;
   while (i < 4) // only read on amps.
   {
@@ -121,15 +120,14 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   {
     InputEntry *extRef = input->extRefs;
 
-
     while (extRef != NULL)
     {
       if (strcmp(extRef->intAddr, "PTOC_Amp1") == 0)
       {
-        inst->dspI = init_dsp_I(server, extRef);
-        DSP_add_callback_on_update(inst->dspI,PTOC_callback_SMV, inst);
+        inst->dspI = init_dsp_I(server, extRef);//this is to reference the first extref
+        DSP_add_callback_on_update(inst->dspI,PTOC_callback_SMV, inst);//called when DSP has processed data
       }
-      if (strcmp(extRef->intAddr, "PTOC_Amp3") == 0) // find extref for the last SMV, using the intaddr, so that all values are updated
+      if (strcmp(extRef->intAddr, "PTOC_Amp4") == 0) // find extref for the last SMV phase, using the intaddr, so that all values are updated, we ignore nutral in case we have 3 phase, and neutral is calculated
       {
         extRef->callBack = (callBackFunction)get_DSP_processing_callback(inst->dspI);
         extRef->callBackParam = inst->dspI;
