@@ -10,7 +10,7 @@ const double const_Rms = 0.7071;
 
 typedef struct sRMS
 {
-    float RMS[8];
+    float RMS[4];
     int RMS_samplecountV;
     int RMS_samplecountI;
 
@@ -34,19 +34,19 @@ void CALC_U_RMS(void * dsp)
   RMS * inst = dsp_inst->dsp_data;
 
   InputEntry *extRef = dsp_inst->extRefs; // start from the first extref, and check all values, we assume there are 8!
-  int i = 4;
+  int i = 0;
   float v;
   while (extRef != NULL)
   {
     if (extRef->value != NULL)
     {
-      if (i < 8)
+      if (i < 4)
       {
         if ((inst->RMS_samplecountV % 80) == 0) // every 80 samples we start fresh
         {
           inst->RMS[i] = 0; // start over
         }
-        // calculate RMS value TODO: check correct amount of elements instead of assuming 8, and offload this into a separate thread
+        // calculate RMS value TODO: check correct amount of elements instead of assuming 4, and offload this into a separate thread
         // currently, it is called each time a sampled-value is updated which might become slow
         float ff = (float)MmsValue_toInt32(extRef->value);
         inst->RMS[i] += (ff * ff);
@@ -58,9 +58,9 @@ void CALC_U_RMS(void * dsp)
 
           updateDataValues_Amp(dsp, i, inst->RMS[i]);
 
-          if (i == 7)
+          if (i == 3)
           {
-            v = (inst->RMS[4] + inst->RMS[5] + inst->RMS[6]) / 3;
+            v = (inst->RMS[0] + inst->RMS[1] + inst->RMS[2]) / 3;
             updateDataValues_Average(dsp, v);
           }
         }
@@ -80,7 +80,7 @@ void CALC_I_RMS(void * dsp)
   InputEntry *extRef = dsp_inst->extRefs; // start from the first extref, and check all values, we assume there are 8!
   int i = 0;
   float a;
-  int peakval[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  int peakval[4] = {0, 0, 0, 0};
   while (extRef != NULL)
   {
     if (extRef->value != NULL)

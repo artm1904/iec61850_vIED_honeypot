@@ -35,13 +35,13 @@ void *MMXU_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allI
   inst->da_V_callback = _findAttributeValueEx(inst->da_V, allInputValues);
 
   inst->da_A_phs[0] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.phsA.cVal.mag.f"); // the node to operate on
-  inst->da_A_phs_callback[0] = _findAttributeValueEx(inst->da_A, allInputValues);
+  inst->da_A_phs_callback[0] = _findAttributeValueEx(inst->da_A_phs[0], allInputValues);
   inst->da_A_phs[1] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.phsB.cVal.mag.f"); // the node to operate on
-  inst->da_A_phs_callback[1] = _findAttributeValueEx(inst->da_A, allInputValues);
+  inst->da_A_phs_callback[1] = _findAttributeValueEx(inst->da_A_phs[1], allInputValues);
   inst->da_A_phs[2] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.phsC.cVal.mag.f"); // the node to operate on
-  inst->da_A_phs_callback[2] = _findAttributeValueEx(inst->da_A, allInputValues);
+  inst->da_A_phs_callback[2] = _findAttributeValueEx(inst->da_A_phs[2], allInputValues);
   inst->da_A_phs[3] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.neut.cVal.mag.f"); // the node to operate on
-  inst->da_A_phs_callback[3] = _findAttributeValueEx(inst->da_A, allInputValues);
+  inst->da_A_phs_callback[3] = _findAttributeValueEx(inst->da_A_phs[3], allInputValues);
 
   inst->da_A_phsAng[0] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.phsA.cVal.ang.f"); // the node to operate on
   inst->da_A_phsAng[1] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.phsB.cVal.ang.f"); // the node to operate on
@@ -49,13 +49,13 @@ void *MMXU_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allI
   inst->da_A_phsAng[3] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "A.neut.cVal.ang.f"); // the node to operate on
 
   inst->da_V_phs[0] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "PhV.phsA.cVal.mag.f"); // the node to operate on
-  inst->da_V_phs_callback[0] = _findAttributeValueEx(inst->da_V, allInputValues);
+  inst->da_V_phs_callback[0] = _findAttributeValueEx(inst->da_V_phs[0], allInputValues);
   inst->da_V_phs[1] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "PhV.phsB.cVal.mag.f"); // the node to operate on
-  inst->da_V_phs_callback[1] = _findAttributeValueEx(inst->da_V, allInputValues);
+  inst->da_V_phs_callback[1] = _findAttributeValueEx(inst->da_V_phs[1], allInputValues);
   inst->da_V_phs[2] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "PhV.phsC.cVal.mag.f"); // the node to operate on
-  inst->da_V_phs_callback[2] = _findAttributeValueEx(inst->da_V, allInputValues);
+  inst->da_V_phs_callback[2] = _findAttributeValueEx(inst->da_V_phs[2], allInputValues);
   inst->da_V_phs[3] = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "PhV.neut.cVal.mag.f"); // the node to operate on
-  inst->da_V_phs_callback[3] = _findAttributeValueEx(inst->da_V, allInputValues);
+  inst->da_V_phs_callback[3] = _findAttributeValueEx(inst->da_V_phs[3], allInputValues);
 
   if (input != NULL)
   {
