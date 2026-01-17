@@ -78,6 +78,10 @@ set(open_server_SRCS
     model/config_file_parser_extensions.c
     model/dynamic_model_extensions.c
 
+    functions/rms.c
+    functions/dft.c
+    functions/dsp.c
+
     LNs/SMVPublisher.c
     LNs/LNParse.c
     LNs/CILO.c
