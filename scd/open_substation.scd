@@ -197,7 +197,8 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
           <LN lnClass="XCBR" lnType="XCBR1" inst="1" prefix="">
             <Inputs>
               <ExtRef intAddr="Tr" desc="Trip" iedName="IED2_PTOC" ldInst="GenericIO" lnClass="PTRC" lnInst="1" doName="Tr" daName="general" serviceType="GOOSE" srcLDInst="GenericIO" srcLNClass="LLN0" srcCBName="GoCB" />
-              <ExtRef intAddr="Op" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="1" doName="Pos" daName="opOk" serviceType="Poll" />
+              <ExtRef intAddr="OpOpn" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="1" doName="OpOpn" daName="general" serviceType="Poll" />
+              <ExtRef intAddr="OpCls" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="1" doName="OpCls" daName="general" serviceType="Poll" />
             </Inputs>
           </LN>
           <LN lnClass="CSWI" lnType="CSWIa" inst="1" prefix="">
@@ -207,7 +208,7 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
               </DAI>
             </DOI>
             <Inputs>
-              <ExtRef intAddr="xcbr_stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="Poll" />
+              <ExtRef intAddr="stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="Poll" />
             </Inputs>
           </LN>
           <LN lnClass="XSWI" lnType="XSWI1" inst="2" prefix="">
@@ -217,7 +218,8 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
               </DAI>
             </DOI>
             <Inputs>
-              <ExtRef intAddr="Tr" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="2" doName="Pos" daName="opOk" serviceType="Poll" />
+              <ExtRef intAddr="OpOpn" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="2" doName="OpOpn" daName="general" serviceType="Poll" />
+              <ExtRef intAddr="OpCls" desc="Operate" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CSWI" lnInst="2" doName="OpCls" daName="general" serviceType="Poll" />
             </Inputs>
           </LN>
           <LN lnClass="CSWI" lnType="CSWIa" inst="2" prefix="">
@@ -227,14 +229,14 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
               </DAI>
             </DOI>
             <Inputs>
-              <ExtRef intAddr="xcbr_stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XSWI" lnInst="2" doName="Pos" daName="stVal" serviceType="Poll" />
+              <ExtRef intAddr="stval" desc="XSWI_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XSWI" lnInst="2" doName="Pos" daName="stVal" serviceType="Poll" />
               <ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll" />
               <ExtRef intAddr="EnaCls" desc="interlock_close" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll" />
             </Inputs>
           </LN>
           <LN lnClass="CILO" lnType="CILO1" inst="1" prefix="">
             <Inputs>
-              <ExtRef intAddr="stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="Poll" />
+              <ExtRef intAddr="stval" desc="XCBR_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="Poll" />
             </Inputs>
           </LN>
         </LDevice>
@@ -291,8 +293,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
               <ExtRef intAddr="PTOC_Vol2" desc="sample_v2" iedName="IED3_SMV" ldInst="MUnn" lnClass="TVTR" lnInst="2" doName="VolSv" serviceType="SMV" srcLDInst="MUnn" srcLNClass="LLN0" srcCBName="MSVCB01" />
               <ExtRef intAddr="PTOC_Vol3" desc="sample_v3" iedName="IED3_SMV" ldInst="MUnn" lnClass="TVTR" lnInst="3" doName="VolSv" serviceType="SMV" srcLDInst="MUnn" srcLNClass="LLN0" srcCBName="MSVCB01" />
               <ExtRef intAddr="PTOC_Vol4" desc="sample_v4" iedName="IED3_SMV" ldInst="MUnn" lnClass="TVTR" lnInst="4" doName="VolSv" serviceType="SMV" srcLDInst="MUnn" srcLNClass="LLN0" srcCBName="MSVCB01" />
-
-              <ExtRef intAddr="PTOC_xcbr_stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="GOOSE" srcLDInst="GenericIO" srcLNClass="LLN0" srcCBName="GoCB" />
             </Inputs>
           </LN>
           <LN lnClass="PTRC" lnType="PTRC1" inst="1" prefix="" >
@@ -469,9 +469,9 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
       <DO name="Beh" type="INS_1_Beh" />
       <DO name="Health" type="INS_1_Beh" />
       <DO name="NamPlt" type="LPL_2_NamPlt" />
+      <DO name="Str" type="ACD" />
       <DO name="Op" type="ACT" />
       <DO name="Tr" type="ACT" />
-      <DO name="Str" type="ACT" />
     </LNodeType>
 
     <LNodeType id="PTOC1" lnClass="PTOC">
@@ -567,6 +567,8 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
       <DO name="Beh" type="INS_1_Beh"/>
       <DO name="Health" type="INS_1_Beh"/>
       <DO name="NamPlt" type="LPL_2_NamPlt"/>
+      <DO name="OpOpn" type="ACT" />
+      <DO name="OpCls" type="ACT" />
       <DO name="Pos" type="DPC_CO"/>
     </LNodeType>
 
@@ -638,7 +640,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
       <DA name="stVal" bType="Dbpos" fc="ST" dchg="true" desc="intermediate-state | off | on | bad-state" />
       <DA name="q" bType="Quality" fc="ST" qchg="true" desc="Quality of the data value: 'stVal'." />
       <DA name="t" bType="Timestamp" fc="ST" desc="Timestamp of the last change in one of the attributes representing the data value ('stVal') or the data quality ('q'), i.e., those which have 'dchg' or 'qchg'." />
-      <DA name="opOk" bType="BOOLEAN" fc="OR" dchg="true" />
       <DA name="ctlModel" fc="CF" bType="Enum" type="CtlModels"/>
       <DA name="Oper" fc="CO" bType="Struct" type="DPCOperate_1"/>
       <DA name="SBOw" fc="CO" bType="Struct" type="DPCOperate_1"/>
