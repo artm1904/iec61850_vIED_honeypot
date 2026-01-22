@@ -297,8 +297,7 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
           </LN>
           <LN lnClass="PTRC" lnType="PTRC1" inst="1" prefix="" >
             <Inputs>
-              <ExtRef intAddr="PTOC_Op" desc="PTOC_trip" iedName="IED2_PTOC" ldInst="GenericIO" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll" />
-              <ExtRef intAddr="xcbr_stval" desc="xcbr_status" iedName="IED1_XCBR" ldInst="GenericIO" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="GOOSE" srcLDInst="GenericIO" srcLNClass="LLN0" srcCBName="GoCB" />
+              <ExtRef intAddr="Op_PTOC" desc="PTOC_trip" iedName="IED2_PTOC" ldInst="GenericIO" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll" />
             </Inputs>
           </LN>
           <LN lnClass="GGIO" lnType="GGIO1" inst="1" prefix="">
@@ -459,7 +458,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
     </LNodeType>
 
     <LNodeType id="CILO1" lnClass="CILO">
-      <DO name="Mod" type="INC_1_Mod" />
       <DO name="Beh" type="INS_1_Beh" />
       <DO name="Health" type="INS_1_Beh" />
       <DO name="NamPlt" type="LPL_1_NamPlt" />
@@ -468,16 +466,15 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
     </LNodeType>
 
     <LNodeType id="PTRC1" lnClass="PTRC">
-      <DO name="Mod" type="INC_2_Mod" />
       <DO name="Beh" type="INS_1_Beh" />
       <DO name="Health" type="INS_1_Beh" />
       <DO name="NamPlt" type="LPL_2_NamPlt" />
       <DO name="Op" type="ACT" />
       <DO name="Tr" type="ACT" />
+      <DO name="Str" type="ACT" />
     </LNodeType>
 
     <LNodeType id="PTOC1" lnClass="PTOC">
-      <DO name="Mod" type="INC_2_Mod" />
       <DO name="Beh" type="INS_1_Beh" />
       <DO name="Health" type="INS_1_Beh" />
       <DO name="NamPlt" type="LPL_2_NamPlt" />
@@ -487,7 +484,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
     </LNodeType>
 
     <LNodeType id="PIOC1" lnClass="PIOC">
-      <DO name="Mod" type="INC_2_Mod" />
       <DO name="Beh" type="INS_1_Beh" />
       <DO name="Health" type="INS_1_Beh" />
       <DO name="NamPlt" type="LPL_2_NamPlt" />
@@ -497,7 +493,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
     </LNodeType>
 
 		<LNodeType id="PDIFa" lnClass="PDIF">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
@@ -506,7 +501,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
 		</LNodeType>
 
 		<LNodeType id="PDISa" lnClass="PDIS">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
@@ -515,7 +509,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
 		</LNodeType>
 
 		<LNodeType id="RRECa" lnClass="RREC">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
@@ -524,21 +517,19 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
 		</LNodeType>
 
 		<LNodeType id="RADRa" lnClass="RADR">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
 			<DO name="ChTrg" type="SPS_1_Proxy"/>
 		</LNodeType>
+
     <LNodeType id="RBDRa" lnClass="RBDR">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
 			<DO name="ChTrg" type="SPS_1_Proxy"/>
 		</LNodeType>
     <LNodeType id="RDREa" lnClass="RDRE">
-			<DO name="Mod" type="INC_2_Mod"/>
 			<DO name="Beh" type="INS_1_Beh"/>
 			<DO name="Health" type="INS_1_Beh"/>
 			<DO name="NamPlt" type="LPL_2_NamPlt"/>
@@ -580,7 +571,6 @@ xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL schema/SCL.xsd" >
     </LNodeType>
 
     <LNodeType id="MMXUa" lnClass="MMXU">
-      <DO name="Mod" type="INC_2_Mod"/>
       <DO name="Beh" type="INS_1_Beh"/>
       <DO name="Health" type="INS_1_Beh"/>
       <DO name="NamPlt" type="LPL_2_NamPlt"/>

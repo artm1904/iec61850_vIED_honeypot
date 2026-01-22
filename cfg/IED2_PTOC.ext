@@ -23,8 +23,7 @@ ER(xcbr_status IED1_XCBRGenericIO/XCBR1.Pos.stVal PTOC_xcbr_stval GOOSE IED1_XCB
 LN(PTRC1){
 CL(PTRC);
 IN{
-ER(PTOC_trip IED2_PTOCGenericIO/PTOC1.Op.general PTOC_Op Poll IED2_PTOC/);
-ER(xcbr_status IED1_XCBRGenericIO/XCBR1.Pos.stVal xcbr_stval GOOSE IED1_XCBRGenericIO/LLN0.GoCB);
+ER(PTOC_trip IED2_PTOCGenericIO/PTOC1.Op.general Op_PTOC Poll IED2_PTOC/);
 }
 }
 LN(GGIO1){
