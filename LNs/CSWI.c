@@ -28,8 +28,6 @@ void CSWI_currentValue_callback(InputEntry *extRef)
   if (extRef->value != NULL)
   {
     inst->currentValue = Dbpos_fromMmsValue(extRef->value);
-    // MmsValue_printToBuffer(extRef->value, printBuf, 1024);
-    // printf("CSWI: Received Breaker position: %s\n", printBuf);
   }
 }
 

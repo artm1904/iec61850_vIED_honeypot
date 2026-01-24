@@ -13,11 +13,9 @@
 #include "TCTR.h"
 #include "TVTR.h"
 #include "config_parser.h"
+
 #include <stdio.h>
 #include <string.h>
-
-
-// SOCKET example code
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -25,9 +23,12 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <signal.h>
+#include <math.h>
 
 #define BUFFER_SIZE 4096
 #define LINE_BUFFER_SIZE 8192
+
+#define HW_MAX_ANALOG_CHANNELS 18
 
 typedef struct sHwConfig
 {
@@ -37,41 +38,24 @@ typedef struct sHwConfig
     struct sHwConfig *sibling;
 } HwConfig;
 
+HwConfig *HwConfigListSwitch_head = NULL;
+HwConfig *HwConfigListMeas_head = NULL;
 
-HwConfig *HwConfigList_head = NULL;
 int sockfd = -1;
+bool shutdown_flag = true;
+int analog_channels[HW_MAX_ANALOG_CHANNELS];
 
 int initSocket(const char *sock_path);
-int send_cmd(int sockfd, char * send_buf);
+void send_cmd(int sockfd, char * send_buf);
+static void hw_connector_SMV_Thread(void *parameter);
 
-// socket example code end
-
-// check ied-name, for config-entry
-// connect to socket based on config
-// connect cbr callback to xcbr/xswi and io-index based on config
-// receive switch-status events, and modify respective stval(ref in config)
-// when an operate-signal is send, send set io command over socket, based on config
-// receive transformer-data and write it into CTR/VTR elements
-//
 // possible timestep call from socket to all clients?(to pace and sync the ieds?)
 // possible dsp-override: if so, when a dsp-processing call is made, we just provide the rms-value the sine was calced from in the first place
-//
-//     if cmd[0] == "SET" and len(cmd) == 3:    ch = int(cmd[1]) state_val = cmd[2]
-//   elif cmd[0] == "GET" and len(cmd) == 2:  ch = int(cmd[1])
-//   elif cmd[0] == "GETDATA":
 
-void XSWIcallback(void *inst, bool state)
-{
-    char buffer[64];
-    XSWI *instance = inst;
-    HwConfig *conf = instance->config;
-    sprintf(buffer, "SET %d %d",conf->hwindex, state);
-    send_cmd(conf->socket, buffer);
-}
 
 void * getInstViaHwIndex(int index)
 {
-    HwConfig *hwconf = HwConfigList_head;
+    HwConfig *hwconf = HwConfigListSwitch_head;
     while(hwconf)
     {
         if(hwconf->hwindex == index)
@@ -83,6 +67,27 @@ void * getInstViaHwIndex(int index)
     return NULL;
 }
 
+void XSWIcallback(void *inst, bool state)
+{
+    char buffer[64];
+    XSWI *instance = inst;
+    HwConfig *conf = instance->config;
+    sprintf(buffer, "SET %d %d\n",conf->hwindex, state);
+    send_cmd(conf->socket, buffer);
+}
+
+
+void send_cmd(int sockfd, char * send_buf)
+{
+    // Send command with newline
+    if(shutdown_flag)
+        return;
+    ssize_t sent = send(sockfd, send_buf, strlen(send_buf), 0);
+    if (sent < 0) {
+        printf("[Send error: %s]\n", strerror(errno));
+    }
+}
+
 int init(OpenServerInstance *srv)
 {
     IedModel *model;
@@ -92,6 +97,10 @@ int init(OpenServerInstance *srv)
     model = srv->Model;
     model_ex = srv->Model_ex;
     
+    for(int channels = 0; channels < HW_MAX_ANALOG_CHANNELS; channels++){
+        analog_channels[channels] = 0;
+    }
+
     config_t config;
     
     /* Parse the config file */
@@ -145,8 +154,8 @@ int init(OpenServerInstance *srv)
             conf->socket = socket;
             conf->inst = item;
             //place conf in linked list
-            conf->sibling = HwConfigList_head;
-            HwConfigList_head = conf;
+            conf->sibling = HwConfigListSwitch_head;
+            HwConfigListSwitch_head = conf;
             //
             item->config = conf;
             setXSWI_Callback(item, XSWIcallback);
@@ -164,8 +173,8 @@ int init(OpenServerInstance *srv)
             conf->socket = socket;
             conf->inst = item;
             //place conf in linked list
-            conf->sibling = HwConfigList_head;
-            HwConfigList_head = conf;
+            conf->sibling = HwConfigListSwitch_head;
+            HwConfigListSwitch_head = conf;
             //
             item->config = conf;
             setXSWI_Callback(item, XSWIcallback);
@@ -173,21 +182,44 @@ int init(OpenServerInstance *srv)
         }
         if(strcmp(ln->lnClass,"TCTR") == 0)
         {
-            TCTR *item = ln->instance;
-            if (section->entries[i].value_count == 1) {
-                printf("TCTR: %s\n", section->entries[i].values[0]);
+            if (section->entries[i].value_count != 1) {
+                printf("ERROR: TCTR: incorrect value format. should only be 1 number\n");
+                continue;
             }
+            TCTR *item = ln->instance;
+            HwConfig *conf = (HwConfig *)malloc(sizeof(HwConfig));
+            conf->hwindex = (int)strtol(section->entries[i].values[0], NULL, 10);
+            conf->socket = socket;
+            conf->inst = item;
+            //place conf in linked list
+            conf->sibling = HwConfigListMeas_head;
+            HwConfigListMeas_head = conf;
+            printf("TCTR: set hw index to %d\n", conf->hwindex);
         }
         if(strcmp(ln->lnClass,"TVTR") == 0)
         {
-            TVTR *item = ln->instance;
-            if (section->entries[i].value_count == 1) {
-                printf("TVTR: %s\n", section->entries[i].values[0]);
+            if (section->entries[i].value_count != 1) {
+                printf("ERROR: TVTR: incorrect value format. should only be 1 number\n");
+                continue;
             }
+            TVTR *item = ln->instance;
+            HwConfig *conf = (HwConfig *)malloc(sizeof(HwConfig));
+            conf->hwindex = (int)strtol(section->entries[i].values[0], NULL, 10);
+            conf->socket = socket;
+            conf->inst = item;
+            //place conf in linked list
+            conf->sibling = HwConfigListMeas_head;
+            HwConfigListMeas_head = conf;
+            printf("TVTR: set hw index to %d\n", conf->hwindex);
         }
     }
 
     config_free(&config);
+    if(HwConfigListMeas_head)
+    {
+        Thread thread = Thread_create((ThreadExecutionFunction)hw_connector_SMV_Thread, NULL, true);
+        Thread_start(thread);
+    }
 
 
     printf("hw_connector module initialised\n");
@@ -197,7 +229,7 @@ int init(OpenServerInstance *srv)
 
 void *receiver_thread(int * arg) {
     int sockfd_threat = *arg;
-    bool shutdown_flag = false;
+    shutdown_flag = false;
     char buffer[BUFFER_SIZE];
     char line_buffer[LINE_BUFFER_SIZE] = {0};
     int line_pos = 0;
@@ -241,6 +273,27 @@ void *receiver_thread(int * arg) {
                         // Distribute event to XSWI/XCBR/TVTR/TCTR
                         if(strncmp(event_data, "DATA", 4) == 0){
                             printf("recv: %s\n", &event_data[5]); //Avalue,value,... Sbyte,byte,... A=analog value, S=shortcitcuit yes/no        A0,1,2,3,4,5,6,7,8,9,10,11 S01,02,03,04,05,06
+                            if(event_data[5]== 'A')
+                            {
+                                char *charpos = &event_data[6];
+                                for(int channels = 0; channels < HW_MAX_ANALOG_CHANNELS; channels++)
+                                {
+                                    analog_channels[channels] = strtol(charpos,&charpos, 10);
+                                    if(*charpos == ',')
+                                        charpos++;
+                                    else if(channels != HW_MAX_ANALOG_CHANNELS -1)
+                                    {
+                                        printf("ERROR: could not parse analog data after channel: %d. Remainder: %s\n", channels, charpos);
+                                        break;
+                                    }
+                                }
+                                if(*charpos != '\0')
+                                    printf("ERROR, not found null at expected end of string. Remainder: %s\n", charpos);
+                            }
+                            else
+                            { 
+                                printf("ERROR: could not parse analog data\n");
+                            }
                         }
                         if(strncmp(event_data, "IO", 2) == 0){
                             char * endp;
@@ -284,6 +337,7 @@ void *receiver_thread(int * arg) {
             }
         }
     }
+    shutdown_flag = 1;
     printf("shutting down hw_connector socket\n");
     shutdown(sockfd_threat, SHUT_RDWR);
     close(sockfd_threat);
@@ -328,11 +382,67 @@ int initSocket(const char *sock_path) {
     return sockfd;
 }
 
-int send_cmd(int sockfd, char * send_buf)
+static void hw_connector_SMV_Thread(void *parameter) // TODO: sync with the threads in other servers connected to the same CTR/VTR
 {
-    // Send command with newline
-    ssize_t sent = send(sockfd, send_buf, strlen(send_buf), 0);
-    if (sent < 0) {
-        printf("[Send error: %s]\n", strerror(errno));
+    printf("hw connector smv thread started\n");
+    int sampleCount = 0;
+
+    uint64_t nextCycleStart = Hal_getTimeInMs() + 1000;
+    while (open_server_running())
+    {
+        /* update measurement values */
+        int samplePoint = sampleCount % 80;
+
+        HwConfig *hwconf = HwConfigListMeas_head;
+        while (hwconf)
+        {
+            int measurement = 0;
+            const double magnitude = analog_channels[hwconf->hwindex];
+            const double freq = 50.0;
+            const double angle = (hwconf->hwindex % 3) * 120.0;
+            const double scale = 1000;
+            if (magnitude > 0.001)
+            {
+                double amp = magnitude * sqrt(2); // RMS to peak
+                double angle = ((freq / 25) * M_PI / 80) * samplePoint - (angle * M_PI / 180.0);
+                measurement = (int)((amp * sin(angle)) * scale);
+            }
+            if(hwconf->hwindex < 12) //select tctr/tvtr based on the index of the related measurement. ugly, but fastest
+            {
+                TCTR *inst = hwconf->inst;
+                IedServer_updateInt32AttributeValue(inst->server, inst->da, measurement);
+                InputValueHandleExtensionCallbacks(inst->da_callback); // update the associated callbacks with this Data Element (e.g. MMXU)
+            }
+            else
+            {
+                TVTR *inst = hwconf->inst;
+                IedServer_updateInt32AttributeValue(inst->server, inst->da, measurement);
+                InputValueHandleExtensionCallbacks(inst->da_callback); // update the associated callbacks with this Data Element (e.g. MMXU)
+            }
+
+            hwconf = hwconf->sibling;
+        }
+
+        sampleCount = ((sampleCount + 1) % 4000);
+
+        if ((sampleCount % 400) == 0)
+        {
+            uint64_t timeval = Hal_getTimeInMs();
+
+            while (timeval < nextCycleStart + 100)
+            {
+                Thread_sleep(1);
+
+                timeval = Hal_getTimeInMs();
+            }
+
+            nextCycleStart = nextCycleStart + 100;
+        }
     }
+}
+
+void hw_connector_freemem()
+{
+    //HwConfigListSwitch_head = NULL;
+    //HwConfigListMeas_head = NULL;
 }

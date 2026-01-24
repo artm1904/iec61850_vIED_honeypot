@@ -26,9 +26,14 @@ void PTRC_input_Tr_callback(InputEntry *extRef)
   {
     if (firstExtRef->intAddr != NULL && strncmp(firstExtRef->intAddr, "Op", 2) == 0)
     {
-      if (MmsValue_getBoolean(firstExtRef->value) == true)  // if any of the registered Op values is true
+      if(firstExtRef->value == NULL){ // remote values may be uninitialised, so skip them
+        firstExtRef = firstExtRef->sibling;
+        continue;
+      }
+
+      if (MmsValue_getBoolean(firstExtRef->value) == true && inst->tripstate == false)  // if any of the registered Op values is true, and not yet tripped
       {
-        printf("PTRC: trip from Op\n"); //
+        printf("PTRC: trip from Op: %s\n", firstExtRef->Ref); //
         MmsValue *tripValue = MmsValue_newBoolean(true);
         IedServer_updateAttributeValue(inst->server, inst->Tr_general, tripValue);
         InputValueHandleExtensionCallbacks(inst->Tr_general_callback); // update the associated callbacks with this Data Element
