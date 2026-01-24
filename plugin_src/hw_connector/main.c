@@ -37,12 +37,9 @@ typedef struct sHwConfig
     struct sHwConfig *sibling;
 } HwConfig;
 
-HwConfig *HwConfigList_head = NULL;
 
-typedef struct {
-    int sockfd;
-    volatile int *shutdown_flag;
-} thread_args_t;
+HwConfig *HwConfigList_head = NULL;
+int sockfd = -1;
 
 int initSocket(const char *sock_path);
 int send_cmd(int sockfd, char * send_buf);
@@ -198,16 +195,15 @@ int init(OpenServerInstance *srv)
 }
 
 
-void *receiver_thread(void *arg) {
+void *receiver_thread(int * arg) {
+    int sockfd_threat = *arg;
     bool shutdown_flag = false;
-    thread_args_t *args = (thread_args_t *)arg;
-    int sockfd = args->sockfd;
     char buffer[BUFFER_SIZE];
     char line_buffer[LINE_BUFFER_SIZE] = {0};
     int line_pos = 0;
     
     while (open_server_running() && !shutdown_flag) {
-        ssize_t n = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+        ssize_t n = recv(sockfd_threat, buffer, sizeof(buffer) - 1, 0);
         
         if (n < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -254,32 +250,18 @@ void *receiver_thread(void *arg) {
                             XSWI * instance = getInstViaHwIndex(index);
                             if(instance != NULL)
                             {                                
-                                if(index < 10)
+                                int state = strtol(endp,NULL,10);
+                                if(state == 00)
                                 {
-                                    int state = strtol(endp,NULL,10);
-                                    if(state == 00)
-                                    {
-                                        XSWI_change_switch(instance, DBPOS_INTERMEDIATE_STATE);
-                                    }
-                                    if(state == 01)
-                                    {
-                                        XSWI_change_switch(instance, DBPOS_OFF);
-                                    }
-                                    if(state == 10)
-                                    {
-                                        XSWI_change_switch(instance, DBPOS_ON);
-                                    }
+                                    XSWI_change_switch(instance, DBPOS_INTERMEDIATE_STATE);
                                 }
-                                else
+                                if(state == 01)
                                 {
-                                    if(endp[1] == 'F')
-                                    {
-                                        XSWI_change_switch(instance, DBPOS_OFF);
-                                    }
-                                    if(endp[1] == 'T')
-                                    {
-                                        XSWI_change_switch(instance, DBPOS_ON);
-                                    }
+                                    XSWI_change_switch(instance, DBPOS_OFF);
+                                }
+                                if(state == 10)
+                                {
+                                    XSWI_change_switch(instance, DBPOS_ON);
                                 }
                             }
                             else
@@ -302,14 +284,16 @@ void *receiver_thread(void *arg) {
             }
         }
     }
-    close(sockfd);
+    printf("shutting down hw_connector socket\n");
+    shutdown(sockfd_threat, SHUT_RDWR);
+    close(sockfd_threat);
     return NULL;
 }
 
 int initSocket(const char *sock_path) {
     
     // Create socket
-    int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("socket");
         return 0;
@@ -337,18 +321,8 @@ int initSocket(const char *sock_path) {
         return 0;
     }
     
-    //printf("Connected to %s\n", sock_path);
-    //printf("\nCommands:\n");
-    //printf("  SET <channel> <value>    - Set channel state\n");
-    //printf("  GET <channel>            - Get current event state for channel\n");
-    //printf("  GETDATA                  - Get current data message\n");
-    //printf("  quit                     - Exit program\n");
-    //printf("\nBroadcast events will be displayed automatically as [BROADCAST]\n");
-    //printf("------------------------------------------------------------\n");
-    
     // Start receiver thread
-    thread_args_t thread_args = {sockfd};
-    Thread thread = Thread_create((ThreadExecutionFunction)receiver_thread, &thread_args, true);
+    Thread thread = Thread_create((ThreadExecutionFunction)receiver_thread, &sockfd, true);
     Thread_start(thread);
         
     return sockfd;
