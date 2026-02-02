@@ -81,6 +81,7 @@ void *MMXU_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allI
         dspU = init_dsp_U(server, extRef);
         DSP_add_value_update_Average(dspU, inst->da_V, inst->da_V_callback);
         DSP_add_value_update_Phs(dspU, inst->da_V_phs, inst->da_V_phs_callback);
+        DSP_add_value_update_PhsAng(dspU, inst->da_A_phsAng);//no callback
       }
       if (strcmp(extRef->intAddr, "MMXU_Vol3") == 0) // find extref for the last SMV, using the intaddr, so that all values are updated
       {

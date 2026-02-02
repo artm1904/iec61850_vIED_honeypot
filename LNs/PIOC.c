@@ -64,6 +64,14 @@ void PIOC_callback_SMV(void *pioc_inst)
   inst->tripTimer++;
 }
 
+static void getPIOCSettings(IedServer server, LogicalNode *ln)
+{
+  DataAttribute * StrVal = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "StrVal.setMag.f"); // the node to operate on
+  MmsValue* StrValValue = IedServer_getAttributeValue(server,  StrVal);
+  float val = MmsValue_toFloat(StrValValue);
+  printf("PIOC Setting StrVal: %f\n",val);
+}
+
 void * PIOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allInputValues)
 {
   PIOC *inst = (PIOC *)malloc(sizeof(PIOC)); // create new instance with MALLOC
@@ -94,5 +102,10 @@ void * PIOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
       extRef = extRef->sibling;
     }
   }
+
+  //getPIOCSettings(server, ln);
+
   return inst;
 }
+
+

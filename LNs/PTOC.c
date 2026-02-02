@@ -93,6 +93,14 @@ void PTOC_callback_SMV(void *ptoc_inst)
   inst->tripTimer++;
 }
 
+static void getPTOCSettings(IedServer server, LogicalNode *ln)
+{
+  DataAttribute * StrVal = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "StrVal.setMag.f"); // the node to operate on
+  MmsValue* StrValValue = IedServer_getAttributeValue(server,  StrVal);
+  float val = MmsValue_toFloat(StrValValue);
+  printf("PTOC Setting StrVal: %f\n",val);
+}
+
 void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allInputValues)
 {
   PTOC *inst = (PTOC *)malloc(sizeof(PTOC)); // create new instance with MALLOC
@@ -123,5 +131,7 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
       extRef = extRef->sibling;
     }
   }
+  //getPTOCSettings(server, ln);
+
   return inst;
 }
