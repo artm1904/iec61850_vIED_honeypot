@@ -1,6 +1,7 @@
 #include "mms_utilities.h"
-#include <libiec61850/mms_value.h>
 #include <stdio.h>
+#include <libiec61850/mms_value.h>
+
 
 void getValueFromMMS(void * mmsval, void * ref, ctype reftype)
 {
@@ -91,4 +92,89 @@ void getValueFromMMS(void * mmsval, void * ref, ctype reftype)
 }
 
 
-
+/**
+ * Retrieve multiple data points from an IEC61850 server
+ * 
+ * @param server    The IEC61850 server instance
+ * @param ln        The logical node to retrieve data from
+ * @param dataPoints Array of data points to retrieve
+ * @param count     Number of data points in the array
+ * @return          Number of successfully retrieved values
+ */
+int IecServer_getDataPoints(IedServer server, LogicalNode* ln, IecDataPoint* dataPoints, int count)
+{
+    int successCount = 0;
+    
+    for (int i = 0; i < count; i++) {
+        dataPoints[i].success = false;
+        
+        // Get the data attribute
+        DataAttribute* attr = (DataAttribute*)ModelNode_getChild((ModelNode*)ln, dataPoints[i].reference);
+        
+        if (attr == NULL) {
+            continue;  // Reference not found
+        }
+        
+        // Get the value
+        MmsValue* mmsValue = IedServer_getAttributeValue(server, attr);
+        
+        if (mmsValue == NULL) {
+            continue;  // Failed to get value
+        }
+        MmsType mmsType = MmsValue_getType(mmsValue);
+        
+        // Extract value based on type
+        switch (dataPoints[i].type) {
+            case IEC_TYPE_BOOL:
+                if(mmsType != MMS_BOOLEAN) continue;
+                dataPoints[i].value.boolVal = MmsValue_getBoolean(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_INT32:
+                if(mmsType != MMS_UNSIGNED && mmsType != MMS_INTEGER) continue;
+                dataPoints[i].value.int32Val = MmsValue_toInt32(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_INT64:
+                if(mmsType != MMS_UNSIGNED && mmsType != MMS_INTEGER) continue;
+                dataPoints[i].value.int64Val = MmsValue_toInt64(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_UINT32:
+                if(mmsType != MMS_UNSIGNED && mmsType != MMS_INTEGER) continue;
+                dataPoints[i].value.uint32Val = MmsValue_toUint32(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_FLOAT:
+                if(mmsType != MMS_FLOAT) continue;
+                dataPoints[i].value.floatVal = MmsValue_toFloat(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_DOUBLE:
+                if(mmsType != MMS_FLOAT) continue;
+                dataPoints[i].value.doubleVal = MmsValue_toDouble(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            case IEC_TYPE_STRING:
+                if(mmsType != MMS_STRING && mmsType != MMS_VISIBLE_STRING) continue;
+                dataPoints[i].value.stringVal = MmsValue_toString(mmsValue);
+                dataPoints[i].success = true;
+                break;
+                
+            default:
+                break;
+        }
+        
+        if (dataPoints[i].success) {
+            successCount++;
+        }
+    }
+    
+    return successCount;
+}

@@ -18,6 +18,7 @@ typedef struct sPIOC
   int tripTimer;
   bool trip;
   DSP *dspI;
+  double StrVal;
 } PIOC;
 
 
@@ -32,7 +33,7 @@ void PIOC_callback_SMV(void *pioc_inst)
     double current =  DSP_get_phs(inst->dspI, i); // get absolute current from dsp
     // check if value is outside allowed band
     // TODO: get values from settings
-    if (current > 1000 )
+    if (current > inst->StrVal )
     {
       printf("PIOC: treshold reached\n");
       MmsValue *tripValue = MmsValue_newBoolean(true);
@@ -82,6 +83,17 @@ void * PIOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   inst->Op_general_callback = _findAttributeValueEx(inst->Op_general, allInputValues);
   inst->input = input;
   inst->dspI = NULL;
+  inst->StrVal = 600; // 600 Amps, sane default in relation to a PTOC StrVal of 100 A
+
+  IecDataPoint dataPoints[1] = {
+      {"StrVal.setMag.f", IEC_TYPE_DOUBLE},
+  };
+  // Retrieve settings from datamodel
+  int retrieved = IecServer_getDataPoints(server, ln, dataPoints, 1);
+  // if found, assign them
+  if (dataPoints[0].success) {
+      inst->StrVal = dataPoints[0].value.floatVal;
+  }
 
   if (input != NULL)
   {
