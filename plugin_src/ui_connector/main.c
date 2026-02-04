@@ -72,7 +72,8 @@ ui_loop
 #include <math.h>
 
 #define BUFFER_SIZE 1024
-#define SOCKET_PATH "/tmp/iec61850_relay_1.sock"
+
+static const char *socket_path = NULL;
 
 typedef enum {
     BREAKER_OPEN = 0,
@@ -91,6 +92,8 @@ typedef struct {
     int trip_active;
 } RelayData;
 //socket stub
+
+static void UI_connector_socket_Thread(void * parameter);
 
 int init(OpenServerInstance *srv)
 {
@@ -118,22 +121,33 @@ int init(OpenServerInstance *srv)
         return 1;
     }
 
-    printf(" Device: %s\n", section->section);
-    const char *socket_path = config_get_value(section, "socket");
-
     /* Iterate through all key-value pairs */
-    printf("\n === All settings for %s ===\n", model->name);
+    printf("\n settings for %s \n", section->section);
     for (int i = 0; i < section->entry_count; i++) {
-        printf("  %s = ", section->entries[i].key);
-        if (section->entries[i].value_count == 1) {
-            printf("%s\n", section->entries[i].values[0]);
-        } else {
-            printf("[");
-            for (int j = 0; j < section->entries[i].value_count; j++) {
-                printf("%s%s", section->entries[i].values[j],
-                       j < section->entries[i].value_count - 1 ? ", " : "");
+        //printf("  %s = ", section->entries[i].key);
+         // known keys
+        if(strcmp(section->entries[i].key,"socket") == 0)
+        {
+            if(socket_path != NULL)
+            {
+                printf("WARNING: socket path already set to: %s! this second socket path definition is ignored: %s \n",socket_path,config_get_value(section, "socket"));
+                continue;
             }
-            printf("]\n");
+            const char *tmpsocket = config_get_value(section, "socket");
+            const int socketln = strlen(tmpsocket);
+            if(socketln > 256) {
+                printf("ERROR: invalid socket path\n");
+                continue;
+            }
+
+            char *socket_path_t = malloc(socketln+1);
+            strcpy(socket_path_t,tmpsocket);
+            socket_path = socket_path_t;
+
+            Thread thread = Thread_create((ThreadExecutionFunction)UI_connector_socket_Thread, NULL, true);
+            Thread_start(thread);
+
+            continue;
         }
     }
 
@@ -192,7 +206,7 @@ int build_response(RelayData *relay, char *buffer, size_t size) {
     return snprintf(buffer, size,
         "{\"voltage_l1\":%.2f,\"voltage_l2\":%.2f,\"voltage_l3\":%.2f,"
         "\"current_l1\":%.2f,\"current_l2\":%.2f,\"current_l3\":%.2f,"
-        "\"breaker_state\"%s\",\"trip_active\":%s}\n",
+        "\"breaker_state\":\"%s\",\"trip_active\":%s}\n",
         relay->voltage_l1, relay->voltage_l2, relay->voltage_l3,
         relay->current_l1, relay->current_l2, relay->current_l3,
         state_str, relay->trip_active ? "true" : "false");
@@ -225,20 +239,14 @@ void process_command(const char *cmd, RelayData *relay, char *response, size_t r
     }
 }
 
-int main(int argc, char *argv[]) {
+static void UI_connector_socket_Thread(void * parameter) {
     int server_fd, client_fd;
     struct sockaddr_un addr;
     char buffer[BUFFER_SIZE];
     char response[BUFFER_SIZE];
     RelayData relay;
-    const char *socket_path = SOCKET_PATH;
-    
-    /* Allow socket path as command line argument */
-    if (argc > 1) {
-        socket_path = argv[1];
-    }
-    
-    printf("Starting IEC61850 Relay Simulator on %s\n", socket_path);
+       
+    printf(" Starting ui_connector on socket %s\n", socket_path);
     
     /* Initialize relay */
     init_relay(&relay);
@@ -246,8 +254,8 @@ int main(int argc, char *argv[]) {
     /* Create socket */
     server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd < 0) {
-        perror("socket");
-        return 1;
+        printf("ERROR: cannot create socket\n");
+        return;
     }
     
     /* Remove existing socket file */
@@ -259,66 +267,68 @@ int main(int argc, char *argv[]) {
     strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path) - 1);
     
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("bind");
+        printf("ERROR: cannot bind to path: %s\n", socket_path);
         close(server_fd);
-        return 1;
+        return;
     }
     
     /* Listen for connections */
     if (listen(server_fd, 1) < 0) {
-        perror("listen");
+        printf("ERROR: cannot listen on socket\n");
         close(server_fd);
         unlink(socket_path);
-        return 1;
+        return;
     }
-    
-    printf("Waiting for client connection...\n");
-    
-    /* Accept connection (blocking) */
-    client_fd = accept(server_fd, NULL, NULL);
-    if (client_fd < 0) {
-        perror("accept");
-        close(server_fd);
-        unlink(socket_path);
-        return 1;
-    }
-    
-    printf("Client connected!\n");
-    
-    /* Main command loop */
-    while (1) {
-        ssize_t bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+
+    while(open_server_running())
+    {
+        printf("Waiting for client connection...\n");
         
-        if (bytes_read <= 0) {
-            if (bytes_read == 0) {
-                printf("Client disconnected\n");
-            } else {
-                perror("read");
+        /* Accept connection (blocking) */
+        client_fd = accept(server_fd, NULL, NULL);
+        if (client_fd < 0) {
+            printf("ERROR: invalid client connetion\n");
+            continue;
+        }
+        
+        printf("Client connected!\n"); // only 1 client at a time is allowed
+        
+        /* Main command loop */
+        while (open_server_running()) {
+            ssize_t bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
+            
+            if (bytes_read <= 0) {
+                if (bytes_read == 0) {
+                    printf("Client disconnected\n");
+                } else {
+                    printf("ERROR: read\n");
+                }
+                break;
             }
-            break;
+            
+            buffer[bytes_read] = '\0';
+            //printf("Received: %s", buffer);
+            
+            /* Process command and build response */
+            process_command(buffer, &relay, response, BUFFER_SIZE);
+            
+            /* Send response */
+            ssize_t bytes_written = write(client_fd, response, strlen(response));
+            if (bytes_written < 0) {
+                printf("ERROR: write\n");
+                break;
+            }
+            
+            //printf("Sent: %s", response);
         }
         
-        buffer[bytes_read] = '\0';
-        printf("Received: %s", buffer);
-        
-        /* Process command and build response */
-        process_command(buffer, &relay, response, BUFFER_SIZE);
-        
-        /* Send response */
-        ssize_t bytes_written = write(client_fd, response, strlen(response));
-        if (bytes_written < 0) {
-            perror("write");
-            break;
-        }
-        
-        printf("Sent: %s", response);
+        /* Cleanup */
+        close(client_fd);
     }
-    
-    /* Cleanup */
-    close(client_fd);
+
     close(server_fd);
     unlink(socket_path);
     
     printf("Server shutdown\n");
-    return 0;
+    return;
 }
