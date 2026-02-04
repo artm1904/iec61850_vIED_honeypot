@@ -55,7 +55,7 @@ typedef struct {
 
 void getValueFromMMS(void * mmsval, void * ref, ctype reftype);
 int IecServer_getDataPoints(IedServer server, LogicalNode* ln, IecDataPoint* dataPoints, int count);
-
+bool IecServer_setDataPoint(IedServer server, DataAttribute* attr, const void* valuePtr);
 
 #ifdef __cplusplus
 }

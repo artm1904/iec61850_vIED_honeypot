@@ -178,3 +178,57 @@ int IecServer_getDataPoints(IedServer server, LogicalNode* ln, IecDataPoint* dat
     
     return successCount;
 }
+
+/**
+ * Set a data point value with automatic type detection
+ * 
+ * @param server    The IEC61850 server instance
+ * @param attr      The data attribute to set
+ * @param valuePtr  Pointer to the value to set
+ * @return          true if successful, false otherwise
+ */
+bool IecServer_setDataPoint(IedServer server, DataAttribute* attr, const void* valuePtr)
+{
+    if (attr == NULL || valuePtr == NULL) {
+        return false;
+    }
+    
+    MmsValue* mmsValue = IedServer_getAttributeValue(server, attr);
+    
+    if (mmsValue == NULL) {
+        return false;
+    }
+    
+    // Detect type from MmsValue
+    MmsType mmsType = MmsValue_getType(mmsValue);
+    
+    switch (mmsType) {
+        case MMS_BOOLEAN:
+            MmsValue_setBoolean(mmsValue, *(const bool*)valuePtr);
+            break;
+            
+        case MMS_INTEGER:
+            MmsValue_setInt32(mmsValue, *(const int32_t*)valuePtr);
+            break;
+            
+        case MMS_UNSIGNED:
+            MmsValue_setUint32(mmsValue, *(const uint32_t*)valuePtr);
+            break;
+            
+        case MMS_FLOAT:
+            MmsValue_setFloat(mmsValue, *(const float*)valuePtr);
+            break;
+            
+        case MMS_STRING:
+        case MMS_VISIBLE_STRING:
+            MmsValue_setMmsString(mmsValue, *(const char* const*)valuePtr);
+            break;
+            
+        default:
+            return false;
+    }
+    
+    IedServer_updateAttributeValue(server, attr, mmsValue);
+    
+    return true;
+}

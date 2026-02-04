@@ -15,6 +15,9 @@ typedef struct sPTOC
   IedServer server;
   DataAttribute *Op_general;
   void *Op_general_callback;
+
+  DataAttribute *DA_StrVal;
+
   Input *input;
 
   bool trip;
@@ -138,6 +141,31 @@ void PTOC_callback_SMV(void *ptoc_inst)
   }
 }
 
+static MmsDataAccessError PTOC_writeAccessHandler (DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
+{
+    PTOC *inst = parameter;
+    if(inst == NULL)
+      return DATA_ACCESS_ERROR_OBJECT_ACCESS_DENIED;
+    
+    if (dataAttribute == inst->DA_StrVal) {
+
+        float newValue = MmsValue_toFloat(value);
+
+        printf("New value for StrVal.setMag.f = %f\n", newValue);
+
+        /* Check if value is inside of valid range */
+        if ((newValue >= 0.f) && (newValue <= 1000.1f)){
+          inst->StrVal = newValue;
+          return DATA_ACCESS_ERROR_SUCCESS;
+        }
+        else
+          return DATA_ACCESS_ERROR_OBJECT_VALUE_INVALID;
+
+    }
+
+    return DATA_ACCESS_ERROR_OBJECT_ACCESS_DENIED;
+}
+
 void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allInputValues)
 {
   PTOC *inst = (PTOC *)malloc(sizeof(PTOC)); // create new instance with MALLOC
@@ -157,7 +185,6 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
       {"OpDlTmms.setVal" , IEC_TYPE_INT32}, // 5 Operate delay time
       {"TypRsCrv.setVal" , IEC_TYPE_INT32}, // 6 Type of reset curve, assume lineair, value is ignored
       {"RsDlTmms.setVal" , IEC_TYPE_INT32}  // 7 Reset delay time
-
   };
 
   // some sane defaults
@@ -167,33 +194,75 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   inst->MaxOpTmms = 800; // 800 ms 
   inst->OpDlTmms = 100;  // 100 ms operate delay
   inst->RsDlTmms = 500;  // 500 ms reset delay time
-  // Retrieve all values
+
+  // Allow writing of setting in the datamodel
+  inst->DA_StrVal = (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "StrVal.setMag.f");
+  if(inst->DA_StrVal)
+    IedServer_handleWriteAccess(server, inst->DA_StrVal, PTOC_writeAccessHandler, inst);
+
+  // Retrieve all values (if defined in the datamodel)
   int retrieved = IecServer_getDataPoints(server, ln, dataPoints, 8);
 
-  // assign them in the ptoc
-  if (dataPoints[1].success) {
+  // assign them in the ptoc, or copy the values back in the datamodel
+  if (dataPoints[1].success  && dataPoints[1].value.floatVal > 0.0) {
       inst->StrVal = dataPoints[1].value.floatVal;
   }
   else {
-    printf("WARNING: PTOC trip current attribute: StrVal set to 0, please define it using <DOI name='StrVal'><SDI name='setMAg'><DAI name='f'><Val>[value]</Val></DAI></SDI></DOI>\n");
+    IecServer_setDataPoint(server,inst->DA_StrVal,&inst->StrVal);
+    printf("WARNING: PTOC trip current attribute: StrVal set to default value: %f, please define it using <DOI name='StrVal'><SDI name='setMag'><DAI name='f'><Val>[value]</Val></DAI></SDI></DOI>\n",inst->StrVal);
   }
-  if (dataPoints[2].success) {
-      inst->TmMult = dataPoints[2].value.floatVal;
+
+  if (dataPoints[2].success && dataPoints[2].value.floatVal > 0.0) {
+    inst->TmMult = dataPoints[2].value.floatVal;
   }
-  if (dataPoints[3].success) {
+  else {
+    IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "TmMult.setMag.f" ),&inst->TmMult);
+    printf("WARNING: PTOC TmMult set to default value: %f, please define it in the SCL using a value greater then 0\n",inst->TmMult);
+  }
+
+  if (dataPoints[3].success && dataPoints[3].value.int32Val > 0) {
       inst->MinOpTmms = (float)dataPoints[3].value.int32Val;
   }
-  if (dataPoints[4].success) {
+  else {
+    int MinOpTmms = (int)inst->MinOpTmms;
+    IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "MinOpTmms.setVal"),&MinOpTmms);
+    printf("WARNING: PTOC MinOpTmms set to default value: %f, please define it in the SCL using a value greater then 0\n",inst->MinOpTmms);
+  }
+
+  if (dataPoints[4].success && dataPoints[4].value.int32Val > 0) {
       inst->MaxOpTmms = (float)dataPoints[4].value.int32Val;
   }
-  if (dataPoints[5].success) {
+  else {
+    int MaxOpTmms = (int)inst->MaxOpTmms;
+    IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "MaxOpTmms.setVal"),&MaxOpTmms);
+    printf("WARNING: PTOC MaxOpTmms set to default value: %f, please define it in the SCL using a value greater then 0\n",inst->MaxOpTmms);
+  }
+
+  if (dataPoints[5].success && dataPoints[5].value.int32Val > 0) {
       inst->OpDlTmms = (float)dataPoints[5].value.int32Val;
   }
-  if (dataPoints[7].success) {
-      inst->RsDlTmms = (float)dataPoints[7].value.int32Val;
+  else {
+    int OpDlTmms = (int) inst->OpDlTmms;
+    IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "OpDlTmms.setVal" ),&OpDlTmms);
+    printf("WARNING: PTOC OpDlTmms set to default value: %f, please define it in the SCL using a value greater then 0\n",inst->OpDlTmms);
   }
 
+  if (dataPoints[7].success && dataPoints[7].value.int32Val > 0) {
+      inst->RsDlTmms = (float)dataPoints[7].value.int32Val;
+  }
+  else {
+    int RsDlTmms = (int) inst->RsDlTmms;
+    IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "RsDlTmms.setVal" ),&RsDlTmms);
+    printf("WARNING: PTOC RsDlTmms set to default value: %f, please define it in the SCL using a value greater then 0\n",inst->RsDlTmms);
+  }
 
+  int TmACrv = 11; // 11 means enumvalue=IEC Inverse curve
+  IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "TmACrv.setCharact" ),&TmACrv);
+  int TypRsCrv = 1; // 1 means enumvalue=None, so no curve
+  IecServer_setDataPoint(server,(DataAttribute *)ModelNode_getChild((ModelNode *)ln, "TypRsCrv.setVal" ),&TypRsCrv);
+
+
+  // Parse input extrefs
   if (input != NULL)
   {
     InputEntry *extRef = input->extRefs;
