@@ -11,29 +11,23 @@
 
 #include "config_parser.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <errno.h>
+#include <time.h>
+#include <math.h>
 
-// check ied-name, for config-entry
-// open listen socket based on config
-// wait for connection from ui
-// if connected, handle requests for data, to send status-info for display
-// when an operate open/close is send, then act, also trip-reset(for latching trip)
-// local-remote setting
-// possible protection-settings(trip-current, trip-time)
-//
-//config-layout:
-// IED-name:NAME (to select right config)
-// socket:SOCKET_NAME
-//
-// connected elements:
-// - REF XSWI1,swi1
-// - REF XCBR,cbr1
-// - REF XSWI3,swi2
-// - REF XSWI4,swi3
-// - REF MMXU,ct-vals
-// - REF LLN0.Loc,loc/remote
-// - REF PTOC, I>
-// - REF PTOC, Tm
+#include "XSWI.h"
+#include "MMXU.h"
+
+#define BUFFER_SIZE 1024
+
 /*
 ui_loop
 	check_ui_requests:
@@ -56,30 +50,27 @@ ui_loop
 			}
 */
 
-// Socket stub
-/*
- * IEC61850 Relay Simulator - Unix Socket Server
- * Compile: gcc -o relay_sim iec61850_stub.c -lm
- * Run: ./relay_sim /tmp/iec61850_relay_1.sock
- */
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <errno.h>
-#include <time.h>
-#include <math.h>
-
-#define BUFFER_SIZE 1024
-
-static const char *socket_path = NULL;
+typedef enum {
+    JSON_TYPE_BOOLEAN,
+    JSON_TYPE_INTEGER,
+    JSON_TYPE_FLOAT
+} JsonValueType;
 
 typedef enum {
-    BREAKER_OPEN = 0,
-    BREAKER_CLOSED = 1,
-    BREAKER_UNKNOWN = 2
+    BREAKER_INTERMEDIATE = 0,
+    BREAKER_OPEN    = 1,    // 01
+    BREAKER_CLOSED  = 2,    // 10
+    BREAKER_UNKNOWN = 3
 } BreakerState;
+
+typedef struct JsonNode {
+    char *name; // key name
+    void *inst; // logical node instance to get the data from
+    IedServer server;
+    DataAttribute* DA_ref;
+    JsonValueType type;
+    struct JsonNode *next;
+} JsonNode;
 
 typedef struct {
     double voltage_l1;
@@ -91,9 +82,16 @@ typedef struct {
     BreakerState breaker_state;
     int trip_active;
 } RelayData;
-//socket stub
+
+static const char *socket_path = NULL;
+static JsonNode *UIConfigList = NULL;
+
+JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, DataAttribute* DA_ref);
+void free_json_list(JsonNode *head);
+char* to_json_string(JsonNode *head);
 
 static void UI_connector_socket_Thread(void * parameter);
+
 
 int init(OpenServerInstance *srv)
 {
@@ -149,107 +147,167 @@ int init(OpenServerInstance *srv)
 
             continue;
         }
+        
+        if(strncmp(section->entries[i].key,"swi",3) == 0) // SWI[index], publish state, accept commands
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            XSWI *item = ln->instance;
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,item->Pos_stVal);
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"cbr",3) == 0) // CBR[index], publish state, accept commands
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            XSWI *item = ln->instance;
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,item->Pos_stVal);
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"ctr",3) == 0) // CTR[index], publish value
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            MMXU *item = ln->instance;
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,item->da_A);
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"vtr",3) == 0) // VTR[index], publish value
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            MMXU *item = ln->instance;
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,item->da_V);
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"loc",3) == 0) // Loc[index], local/remote; publish state and allow switching
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"set",3) == 0) // Setting[index]_[Name], publish value, accept write
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            if(section->entries[i].value_count > 1)
+            {
+                printf("INFO: DA for setting is %s\n",section->entries[i].values[1]);
+                DataAttribute* attr = (DataAttribute*)ModelNode_getChild((ModelNode*)ln->parent, section->entries[i].values[1]);
+                if (attr == NULL) {
+                    printf("ERROR: failed to get DataAttribute for %s in %s\n",section->entries[i].values[1], section->entries[i].values[0]);
+                    continue;  // Failed to get value
+                }
+                // Get the value
+                MmsValue* mmsValue = IedServer_getAttributeValue(srv->server, attr);
+                
+                if (mmsValue == NULL) {
+                    printf("ERROR: failed to get MmsValue for %s\n",section->entries[i].values[1]);
+                    continue;  // Failed to get value
+                }
+                MmsType mmsType = MmsValue_getType(mmsValue);
+                switch(mmsType)
+                {
+                    case MMS_BOOLEAN:
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BOOLEAN,srv->server,attr);
+                    break;
+                    case MMS_INTEGER:
+                    case MMS_UNSIGNED:
+                    case MMS_BIT_STRING:
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,attr);
+                    break;
+                    case MMS_FLOAT:
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,attr);
+                    break;
+                    default:
+                        printf("ERROR: unsupported MMS type for setting ref %s, type is %d", section->entries[i].values[1], mmsType);
+                }
+            }
+            else
+            {
+                printf("ERROR: missing DA for setting %s\n",section->entries[i].key);
+            }
+
+            continue;
+        }
     }
 
     config_free(&config);
 
+    char * jj = to_json_string(UIConfigList);
+    printf("%s\n",jj);
+    free(jj);
     printf("ui_connector module initialised\n");
     return 0; // 0 means success
 }
 
 
 
+static int xasprintf(char **out, const char *fmt, ...)
+{
+    va_list ap;
+    va_list ap_copy;
+    int len;
+    char *buf;
+    if (!out || !fmt) return -1;
 
+    *out = NULL;
 
+    va_start(ap, fmt);
+    va_copy(ap_copy, ap);
 
-/* Initialize relay with default values */
-void init_relay(RelayData *relay) {
-    relay->voltage_l1 = 110.0;
-    relay->voltage_l2 = 110.0;
-    relay->voltage_l3 = 110.0;
-    relay->current_l1 = 0.0;
-    relay->current_l2 = 0.0;
-    relay->current_l3 = 0.0;
-    relay->breaker_state = BREAKER_OPEN;
-    relay->trip_active = 0;
+    len = vsnprintf(NULL, 0, fmt, ap);
+    va_end(ap);
+
+    if (len < 0) {
+        va_end(ap_copy);
+        return -1;
+    }
+
+    buf = malloc((size_t)len + 1);
+    if (!buf) {
+        va_end(ap_copy);
+        return -1;
+    }
+
+    vsnprintf(buf, (size_t)len + 1, fmt, ap_copy);
+    va_end(ap_copy);
+
+    *out = buf;
+    return len;
 }
 
-/* Simulate realistic measurements */
-void update_measurements(RelayData *relay) {
-    static double phase = 0.0;
-    phase += 0.1;
-    if (phase > 2 * M_PI) phase -= 2 * M_PI;
-    
-    /* Add small variations to voltages */
-    relay->voltage_l1 = 110.0 + sin(phase) * 2.0;
-    relay->voltage_l2 = 110.0 + sin(phase + 2.094) * 2.0;  /* 120° phase shift */
-    relay->voltage_l3 = 110.0 + sin(phase + 4.189) * 2.0;  /* 240° phase shift */
-    
-    /* Currents depend on breaker state */
-    if (relay->breaker_state == BREAKER_CLOSED) {
-        relay->current_l1 = 50.0 + sin(phase) * 5.0;
-        relay->current_l2 = 50.0 + sin(phase + 2.094) * 5.0;
-        relay->current_l3 = 50.0 + sin(phase + 4.189) * 5.0;
-    } else {
-        relay->current_l1 = 0.0;
-        relay->current_l2 = 0.0;
-        relay->current_l3 = 0.0;
-    }
-}
-
-/* Build JSON response for measurements */
-int build_response(RelayData *relay, char *buffer, size_t size) {
-    const char *state_str = "UNKNOWN";
-    if (relay->breaker_state == BREAKER_OPEN) state_str = "OPEN";
-    else if (relay->breaker_state == BREAKER_CLOSED) state_str = "CLOSED";
-    
-    return snprintf(buffer, size,
-        "{\"voltage_l1\":%.2f,\"voltage_l2\":%.2f,\"voltage_l3\":%.2f,"
-        "\"current_l1\":%.2f,\"current_l2\":%.2f,\"current_l3\":%.2f,"
-        "\"breaker_state\":\"%s\",\"trip_active\":%s}\n",
-        relay->voltage_l1, relay->voltage_l2, relay->voltage_l3,
-        relay->current_l1, relay->current_l2, relay->current_l3,
-        state_str, relay->trip_active ? "true" : "false");
-}
-
-/* Simple JSON command parser */
-void process_command(const char *cmd, RelayData *relay, char *response, size_t resp_size) {
-    if (strstr(cmd, "get_measurements")) {
-        update_measurements(relay);
-        build_response(relay, response, resp_size);
-    }
-    else if (strstr(cmd, "open_breaker")) {
-        relay->breaker_state = BREAKER_OPEN;
-        snprintf(response, resp_size, "{\"status\":\"ok\",\"action\":\"breaker_opened\"}\n");
-    }
-    else if (strstr(cmd, "close_breaker")) {
-        if (relay->trip_active) {
-            snprintf(response, resp_size, "{\"status\":\"error\",\"message\":\"trip_active\"}\n");
-        } else {
-            relay->breaker_state = BREAKER_CLOSED;
-            snprintf(response, resp_size, "{\"status\":\"ok\",\"action\":\"breaker_closed\"}\n");
-        }
-    }
-    else if (strstr(cmd, "reset_trip")) {
-        relay->trip_active = 0;
-        snprintf(response, resp_size, "{\"status\":\"ok\",\"action\":\"trip_reset\"}\n");
-    }
-    else {
-        snprintf(response, resp_size, "{\"status\":\"error\",\"message\":\"unknown_command\"}\n");
-    }
-}
 
 static void UI_connector_socket_Thread(void * parameter) {
     int server_fd, client_fd;
     struct sockaddr_un addr;
     char buffer[BUFFER_SIZE];
-    char response[BUFFER_SIZE];
-    RelayData relay;
-       
+
     printf(" Starting ui_connector on socket %s\n", socket_path);
-    
-    /* Initialize relay */
-    init_relay(&relay);
     
     /* Create socket */
     server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -309,16 +367,30 @@ static void UI_connector_socket_Thread(void * parameter) {
             buffer[bytes_read] = '\0';
             //printf("Received: %s", buffer);
             
-            /* Process command and build response */
-            process_command(buffer, &relay, response, BUFFER_SIZE);
-            
+            /* Process command and build response */ 
+            char * response = NULL;        
+            if (strstr(buffer, "get_measurements")) {
+                response = to_json_string(UIConfigList);
+            }
+            else if (strstr(buffer, "open_breaker")) {
+                // TODO implement opening of breaker/switch
+                xasprintf(&response, "{\"status\":\"ok\",\"action\":\"breaker_opened\"}\n");
+            }
+            else if (strstr(buffer, "close_breaker")) {
+                // TODO implement closing of breaker/switch
+                xasprintf(&response, "{\"status\":\"ok\",\"action\":\"breaker_closed\"}\n");
+            }
+            else {
+                xasprintf(&response, "{\"status\":\"error\",\"message\":\"unknown_command\"}\n");
+            }
+
             /* Send response */
             ssize_t bytes_written = write(client_fd, response, strlen(response));
+            free(response);
             if (bytes_written < 0) {
                 printf("ERROR: write\n");
                 break;
             }
-            
             //printf("Sent: %s", response);
         }
         
@@ -331,4 +403,116 @@ static void UI_connector_socket_Thread(void * parameter) {
     
     printf("Server shutdown\n");
     return;
+}
+
+/* Main function to convert linked list to JSON string */
+char* to_json_string(JsonNode *head) {
+    if (!head) {
+        /* Empty list returns empty JSON object */
+        char *result = malloc(3);
+        if (result) strcpy(result, "{}");
+        return result;
+    }
+    
+    /* First pass: calculate required buffer size */
+    size_t total_size = 2; /* For opening and closing braces */
+    JsonNode *current = head;
+    int count = 0;
+    
+    while (current) {
+        /* Add size for "name": */
+        total_size += strlen(current->name) + 4; /* quotes + colon + space */
+        
+        /* Add size for value */
+        switch (current->type) {
+            case JSON_TYPE_BOOLEAN:
+                total_size += 5; /* "true" or "false" */
+                break;
+            case JSON_TYPE_INTEGER:
+                total_size += 20; /* Max int digits */
+                break;
+            case JSON_TYPE_FLOAT:
+                total_size += 30; /* Max float representation */
+                break;
+        }
+        
+        if (current->next) {
+            total_size += 2; /* For ", " separator */
+        }
+        
+        current = current->next;
+        count++;
+    }
+    
+    /* Allocate buffer */
+    char *json = malloc(total_size + 1);
+    if (!json) return NULL;
+    
+    /* Build JSON string */
+    strcpy(json, "{");
+    current = head;
+    
+    while (current) {
+        /* Add name */
+        strcat(json, "\"");
+        strcat(json, current->name);
+        strcat(json, "\": ");
+        
+        /* Add value based on type */
+        char temp[100];
+        MmsValue* mmsValue = IedServer_getAttributeValue(current->server, current->DA_ref);
+        switch (current->type) {
+            case JSON_TYPE_BOOLEAN:
+                strcat(json, MmsValue_getBoolean(mmsValue) ? "true" : "false");
+                break;
+            case JSON_TYPE_INTEGER:
+                sprintf(temp, "%d", MmsValue_toInt32(mmsValue));
+                strcat(json, temp);
+                break;
+            case JSON_TYPE_FLOAT:
+                sprintf(temp, "%g", MmsValue_toFloat(mmsValue));
+                strcat(json, temp);
+                break;
+        }
+        
+        /* Add separator if not last element */
+        if (current->next) {
+            strcat(json, ", ");
+        }
+        
+        current = current->next;
+    }
+    
+    strcat(json, "}");
+    return json;
+}
+
+
+JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, DataAttribute* DA_ref) {
+    JsonNode *node = malloc(sizeof(JsonNode));
+    if (!node) return NULL;
+    
+    node->name = malloc(strlen(name) + 1);
+    if (!node->name) {
+        free(node);
+        return NULL;
+    }
+    strcpy(node->name, name);
+    node->type = type;
+    node->server = server;
+    node->DA_ref = DA_ref;
+
+    JsonNode *temp = *head;
+    *head = node;
+    node->next = temp;
+    return node;
+}
+
+void free_json_list(JsonNode *head) {
+    while (head) {
+        JsonNode *temp = head;
+        head = head->next;
+        free(temp->name);
+        free(temp);
+    }
 }

@@ -176,6 +176,7 @@ int init(OpenServerInstance *srv)
             item->config = conf;
             setXSWI_Callback(item, XSWIcallback);
             printf("XSWI: set callback and hw index to %d\n", conf->hwindex);
+            continue;
         }
         if(strcmp(ln->lnClass,"XCBR") == 0)
         {
@@ -194,6 +195,7 @@ int init(OpenServerInstance *srv)
             item->config = conf;
             setXSWI_Callback(item, XSWIcallback);
             printf("XCBR: set callback and hw index to %d\n", conf->hwindex);
+            continue;
         }
         if(strcmp(ln->lnClass,"TCTR") == 0)
         {
@@ -209,6 +211,7 @@ int init(OpenServerInstance *srv)
             conf->sibling = HwConfigListMeas_head;
             HwConfigListMeas_head = conf;
             printf("TCTR: set hw index to %d\n", conf->hwindex);
+            continue;
         }
         if(strcmp(ln->lnClass,"TVTR") == 0)
         {
@@ -225,6 +228,7 @@ int init(OpenServerInstance *srv)
             HwConfigListMeas_head = conf;
             
             printf("TVTR: %s set hw index to %d\n", section->entries[i].key, conf->hwindex);
+            continue;
         }
     }
 
