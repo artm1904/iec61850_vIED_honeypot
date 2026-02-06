@@ -232,3 +232,104 @@ bool IecServer_setDataPoint(IedServer server, DataAttribute* attr, const void* v
     
     return true;
 }
+
+bool IecServer_setDataPointFromString(IedServer server, DataAttribute *da, const char *value)
+{
+    if (!server || !da || !value) {
+        return false;
+    }
+
+    MmsValue* mmsValue = IedServer_getAttributeValue(server, da);
+    if (!mmsValue) {
+        return false;
+    }
+
+    MmsType mmsType = MmsValue_getType(mmsValue);
+    bool success = false;
+
+    switch (mmsType) {
+        case MMS_BOOLEAN: {
+            bool boolValue;
+            if (strcasecmp(value, "true") == 0 || strcmp(value, "1") == 0) {
+                boolValue = true;
+            } else if (strcasecmp(value, "false") == 0 || strcmp(value, "0") == 0) {
+                boolValue = false;
+            } else {
+                return false;
+            }
+            MmsValue_setBoolean(mmsValue, boolValue);
+            success = true;
+            break;
+        }
+
+        case MMS_INTEGER: {
+            char *endptr;
+            long intValue = strtol(value, &endptr, 10);
+            if (*endptr != '\0') {
+                return false;
+            }
+            MmsValue_setInt32(mmsValue, (int32_t)intValue);
+            success = true;
+            break;
+        }
+
+        case MMS_UNSIGNED: {
+            char *endptr;
+            unsigned long uintValue = strtoul(value, &endptr, 10);
+            if (*endptr != '\0') {
+                return false;
+            }
+            MmsValue_setUint32(mmsValue, (uint32_t)uintValue);
+            success = true;
+            break;
+        }
+
+        case MMS_FLOAT: {
+            char *endptr;
+            double floatValue = strtod(value, &endptr);
+            if (*endptr != '\0') {
+                return false;
+            }
+            MmsValue_setDouble(mmsValue, floatValue);
+            success = true;
+            break;
+        }
+
+        case MMS_VISIBLE_STRING:
+        case MMS_STRING: {
+            MmsValue_setVisibleString(mmsValue, value);
+            success = true;
+            break;
+        }
+
+        case MMS_BIT_STRING: {
+            int bitStringSize = MmsValue_getBitStringSize(mmsValue);
+            int valueLen = strlen(value);
+            
+            if (valueLen != bitStringSize) {
+                return false;
+            }
+            
+            for (int i = 0; i < bitStringSize; i++) {
+                if (value[i] == '1') {
+                    MmsValue_setBitStringBit(mmsValue, i, true);
+                } else if (value[i] == '0') {
+                    MmsValue_setBitStringBit(mmsValue, i, false);
+                } else {
+                    return false;
+                }
+            }
+            success = true;
+            break;
+        }
+
+        default:
+            return false;
+    }
+
+    if (success) {
+        IedServer_updateAttributeValue(server, da, mmsValue);
+    }
+
+    return success;
+}

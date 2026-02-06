@@ -8,6 +8,7 @@
 #include "iec61850_model_extensions.h"
 #include "inputs_api.h"
 #include "timestep_config.h"
+#include "mms_utilities.h"
 
 #include "config_parser.h"
 #include <stdio.h>
@@ -27,28 +28,6 @@
 #include "MMXU.h"
 
 #define BUFFER_SIZE 1024
-
-/*
-ui_loop
-	check_ui_requests:
-		{"command": "open_breaker"}-> perform local operate
-		{"command": "close_breaker"}-> perform local operate
-		{"command": "reset_trip"} // maybe handled in UI logic instead
-
-		{"command": "get_measurements"}
-			Expected response format:
-			{
-			  "voltage_l1": 13.8, From MMXU
-			  "voltage_l2": 13.7, From MMXU
-			  "voltage_l3": 13.9, From MMXU
-			  "current_l1": 125.5, From MMXU
-			  "current_l2": 124.8, From MMXU
-			  "current_l3": 126.2, From MMXU
-			  "breaker_state": "CLOSED", From XCBR.Pos.stval
-			  "trip_active": false -> need to be moddeled in PTRC or XCBR as cause of operate
-			  "fault": false -> ncurrent Tr value (not moddeled in UI yet!)
-			}
-*/
 
 typedef enum {
     JSON_TYPE_BOOLEAN,
@@ -86,7 +65,7 @@ typedef struct {
 static const char *socket_path = NULL;
 static JsonNode *UIConfigList = NULL;
 
-JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, DataAttribute* DA_ref);
+JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, void * inst, DataAttribute* DA_ref);
 void free_json_list(JsonNode *head);
 char* to_json_string(JsonNode *head);
 
@@ -157,7 +136,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             XSWI *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,item->Pos_stVal);
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, item, item->Pos_stVal);
             continue;
         }
         if(strncmp(section->entries[i].key,"cbr",3) == 0) // CBR[index], publish state, accept commands
@@ -169,7 +148,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             XSWI *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,item->Pos_stVal);
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, item, item->Pos_stVal);
             continue;
         }
         if(strncmp(section->entries[i].key,"ctr",3) == 0) // CTR[index], publish value
@@ -181,7 +160,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             MMXU *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,item->da_A);
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, item, item->da_A);
             continue;
         }
         if(strncmp(section->entries[i].key,"vtr",3) == 0) // VTR[index], publish value
@@ -193,17 +172,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             MMXU *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,item->da_V);
-            continue;
-        }
-        if(strncmp(section->entries[i].key,"loc",3) == 0) // Loc[index], local/remote; publish state and allow switching
-        {
-            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
-            if (ln == NULL)
-            {
-                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
-                continue; //if not, give up
-            }
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, item, item->da_V);
             continue;
         }
         if(strncmp(section->entries[i].key,"set",3) == 0) // Setting[index]_[Name], publish value, accept write
@@ -233,15 +202,15 @@ int init(OpenServerInstance *srv)
                 switch(mmsType)
                 {
                     case MMS_BOOLEAN:
-                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BOOLEAN,srv->server,attr);
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BOOLEAN,srv->server, NULL, attr);
                     break;
                     case MMS_INTEGER:
                     case MMS_UNSIGNED:
                     case MMS_BIT_STRING:
-                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server,attr);
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, NULL, attr);
                     break;
                     case MMS_FLOAT:
-                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server,attr);
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, NULL, attr);
                     break;
                     default:
                         printf("ERROR: unsupported MMS type for setting ref %s, type is %d", section->entries[i].values[1], mmsType);
@@ -302,10 +271,80 @@ static int xasprintf(char **out, const char *fmt, ...)
 }
 
 
+XSWI * find_xswi(char * ref)
+{
+    JsonNode * head = UIConfigList;
+    while(head)
+    {
+        if(strcmp(head->name,ref) == 0 && head->inst != NULL)
+        {
+            return head->inst;
+        }
+        head = head->next;
+    }
+    return NULL;
+}
+
+JsonNode * find_node(char * ref)
+{
+    JsonNode * head = UIConfigList;
+    while(head)
+    {
+        if(strcmp(head->name,ref) == 0)
+        {
+            return head;
+        }
+        head = head->next;
+    }
+    return NULL;
+}
+
+/* Extract JSON field value - simple parser for "field":"value" */
+int extract_json_string(const char *json, const char *field, char *value, size_t value_size) {
+    char pattern[64];
+    snprintf(pattern, sizeof(pattern), "\"%s\":", field);
+    
+    const char *field_pos = strstr(json, pattern);
+    if (!field_pos) return 0;
+    
+    /* Move past the field name and colon */
+    const char *value_start = field_pos + strlen(pattern);
+    
+    /* Skip whitespace */
+    while (*value_start == ' ' || *value_start == '\t') value_start++;
+    
+    /* Check if value is quoted */
+    if (*value_start == '"') {
+        value_start++;
+        const char *value_end = strchr(value_start, '"');
+        if (!value_end) return 0;
+        
+        size_t len = value_end - value_start;
+        if (len >= value_size) len = value_size - 1;
+        
+        strncpy(value, value_start, len);
+        value[len] = '\0';
+        return 1;
+    }
+    
+    return 0;
+}
+
+/* Check if command matches (looks for "command": in JSON) */
+int is_command(const char *cmd, const char *command_name) {
+    char pattern[64];
+    snprintf(pattern, sizeof(pattern), "\"command\":\"%s\"", command_name);
+    return strstr(cmd, pattern) != NULL;
+}
+
+bool write_setting(DataAttribute * da,const char * arg2)
+{
+    return false;
+}
+
 static void UI_connector_socket_Thread(void * parameter) {
     int server_fd, client_fd;
     struct sockaddr_un addr;
-    char buffer[BUFFER_SIZE];
 
     printf(" Starting ui_connector on socket %s\n", socket_path);
     
@@ -353,6 +392,8 @@ static void UI_connector_socket_Thread(void * parameter) {
         
         /* Main command loop */
         while (open_server_running()) {
+            char arg[64] = "";
+            char buffer[BUFFER_SIZE];
             ssize_t bytes_read = read(client_fd, buffer, BUFFER_SIZE - 1);
             
             if (bytes_read <= 0) {
@@ -369,16 +410,61 @@ static void UI_connector_socket_Thread(void * parameter) {
             
             /* Process command and build response */ 
             char * response = NULL;        
-            if (strstr(buffer, "get_measurements")) {
+            if (is_command(buffer, "get_measurements")) {
                 response = to_json_string(UIConfigList);
             }
-            else if (strstr(buffer, "open_breaker")) {
-                // TODO implement opening of breaker/switch
-                xasprintf(&response, "{\"status\":\"ok\",\"action\":\"breaker_opened\"}\n");
+            else if (is_command(buffer, "open_switch")) {
+                // Try to extract argument 
+                if (extract_json_string(buffer, "switch", arg, sizeof(arg)) && arg[0]) {
+                    XSWI * xswi = find_xswi(arg);
+                    if(xswi) {
+                        if(xswi->XSWI_callback_ln != NULL)
+                            xswi->XSWI_callback_ln(xswi,false);
+
+                        xasprintf(&response, "{\"status\":\"ok\",\"action\":\"open_switch\",\"switch\":\"%s\"}\n", arg);                  
+                    } else {
+                        xasprintf(&response, "{\"status\":\"error\",\"message\":\"switch_not_found\",\"switch\":\"%s\"}\n", arg);
+                    }
+                } else {
+                    xasprintf(&response, "{\"status\":\"error\",\"message\":\"open_switch missing argument\",\"command\":\"%s\"}\n", buffer);
+                }
             }
-            else if (strstr(buffer, "close_breaker")) {
-                // TODO implement closing of breaker/switch
-                xasprintf(&response, "{\"status\":\"ok\",\"action\":\"breaker_closed\"}\n");
+            else if (is_command(buffer, "close_switch")) {
+                // Try to extract argument 
+                if (extract_json_string(buffer, "switch", arg, sizeof(arg)) && arg[0]) {
+                    XSWI * xswi = find_xswi(arg);
+                    if(xswi) {
+                        if(xswi->XSWI_callback_ln != NULL)
+                            xswi->XSWI_callback_ln(xswi,true);
+
+                        xasprintf(&response, "{\"status\":\"ok\",\"action\":\"open_switch\",\"switch\":\"%s\"}\n", arg);
+                    } else {
+                        xasprintf(&response, "{\"status\":\"error\",\"message\":\"switch_not_found\",\"switch\":\"%s\"}\n", arg);
+                    }
+                } else {
+                    xasprintf(&response, "{\"status\":\"error\",\"message\":\"close_switch missing argument\",\"command\":\"%s\"}\n", buffer);
+                }
+            }
+            else if (is_command(buffer, "write_setting")) {
+                // Try to extract argument 
+                if (extract_json_string(buffer, "element", arg, sizeof(arg)) && arg[0]) {
+                    JsonNode *node = find_node(arg);
+                    if(node && node->DA_ref && node->server) {
+                        char arg2[64] = "";
+                        if (extract_json_string(buffer, "value", arg2, sizeof(arg2)) && arg2[0]) {
+                            if( IecServer_setDataPointFromString(node->server, node->DA_ref, arg2) )
+                                xasprintf(&response, "{\"status\":\"ok\",\"action\":\"write_setting\",\"element\":\"%s\",\"value\":\"%s\"}\n", arg, arg2);
+                            else
+                                xasprintf(&response, "{\"status\":\"error\",\"message\":\"write_setting_failed\",\"element\":\"%s\",\"value\":\"%s\"}\n", arg, arg2);
+                        } else {
+                            xasprintf(&response, "{\"status\":\"error\",\"message\":\"value_missing\",\"element\":\"%s\"}\n", arg);
+                        }
+                    } else {
+                        xasprintf(&response, "{\"status\":\"error\",\"message\":\"setting not found or invalid\",\"element\":\"%s\"}\n", arg);
+                    }
+                } else {
+                    xasprintf(&response, "{\"status\":\"error\",\"message\":\"write_setting missing argument\",\"command\":\"%s\"}\n", buffer);
+                }
             }
             else {
                 xasprintf(&response, "{\"status\":\"error\",\"message\":\"unknown_command\"}\n");
@@ -488,7 +574,7 @@ char* to_json_string(JsonNode *head) {
 }
 
 
-JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, DataAttribute* DA_ref) {
+JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, void * inst, DataAttribute* DA_ref) {
     JsonNode *node = malloc(sizeof(JsonNode));
     if (!node) return NULL;
     
@@ -498,8 +584,10 @@ JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, Ied
         return NULL;
     }
     strcpy(node->name, name);
+
     node->type = type;
     node->server = server;
+    node->inst = inst;
     node->DA_ref = DA_ref;
 
     JsonNode *temp = *head;
@@ -516,3 +604,5 @@ void free_json_list(JsonNode *head) {
         free(temp);
     }
 }
+
+
