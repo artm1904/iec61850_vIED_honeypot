@@ -1080,18 +1080,24 @@
 						<Inputs>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="2" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="2" doName="OpCls" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 					<LN lnClass="XSWI" lnType="XSWI$oscd$_430901aa6c264cc1" inst="3" prefix="">
 						<Inputs>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="3" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="3" doName="OpCls" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 					<LN lnClass="XSWI" lnType="XSWI$oscd$_430901aa6c264cc1" inst="4" prefix="">
 						<Inputs>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="4" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="4" doName="OpCls" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 					<LN lnClass="MMXU" lnType="MMXU$oscd$_3abca1c29963576c" inst="1" prefix="">
@@ -1674,9 +1680,15 @@
 			<DA name="setMag" fc="SE" bType="Struct" type="setMag$oscd$_ed49c2f7a55ad05a"/>
 		</DOType>
 		<DOType cdc="SPC" id="BlkCls$oscd$_637b3bee56ce66e4">
+			<DA name="stVal" fc="ST" dchg="true" bType="BOOLEAN"/>
+			<DA name="q" fc="ST" qchg="true" bType="Quality"/>
+			<DA name="t" fc="ST" bType="Timestamp"/>
 			<DA name="ctlModel" fc="CF" dchg="true" bType="Enum" type="ctlModel$oscd$_f80264355419aeff"/>
 		</DOType>
 		<DOType cdc="SPC" id="BlkOpn$oscd$_637b3bee56ce66e4">
+			<DA name="stVal" fc="ST" dchg="true" bType="BOOLEAN"/>
+			<DA name="q" fc="ST" qchg="true" bType="Quality"/>
+			<DA name="t" fc="ST" bType="Timestamp"/>
 			<DA name="ctlModel" fc="CF" dchg="true" bType="Enum" type="ctlModel$oscd$_f80264355419aeff"/>
 		</DOType>
 		<DOType cdc="SPS" id="Loc$oscd$_d915d66d9e42a575">

@@ -108,6 +108,8 @@ CL(XSWI);
 IN{
 ER(Operate FEED1LD1/CSWI2.OpOpn.general OpOpn Poll FEED1/);
 ER(Operate FEED1LD1/CSWI2.OpCls.general OpCls Poll FEED1/);
+ER(interlock_open FEED1LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED1/);
+ER(interlock_close FEED1LD1/CILO1.EnaCls.stVal EnaCls Poll FEED1/);
 }
 }
 LN(XSWI3){
@@ -115,6 +117,8 @@ CL(XSWI);
 IN{
 ER(Operate FEED1LD1/CSWI3.OpOpn.general OpOpn Poll FEED1/);
 ER(Operate FEED1LD1/CSWI3.OpCls.general OpCls Poll FEED1/);
+ER(interlock_open FEED1LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED1/);
+ER(interlock_close FEED1LD1/CILO1.EnaCls.stVal EnaCls Poll FEED1/);
 }
 }
 LN(XSWI4){
@@ -122,6 +126,8 @@ CL(XSWI);
 IN{
 ER(Operate FEED1LD1/CSWI4.OpOpn.general OpOpn Poll FEED1/);
 ER(Operate FEED1LD1/CSWI4.OpCls.general OpCls Poll FEED1/);
+ER(interlock_open FEED1LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED1/);
+ER(interlock_close FEED1LD1/CILO1.EnaCls.stVal EnaCls Poll FEED1/);
 }
 }
 LN(MMXU1){

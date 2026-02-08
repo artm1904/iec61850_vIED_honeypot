@@ -40,7 +40,6 @@ void CSWI_currentValue_callback(InputEntry *extRef)
   }
 }
 
-// receive status from circuit breaker
 void CSWI_EnaOpn_callback(InputEntry *extRef)
 {
   CSWI *inst = extRef->callBackParam;
@@ -55,7 +54,6 @@ void CSWI_EnaOpn_callback(InputEntry *extRef)
   }
 }
 
-// receive status from circuit breaker
 void CSWI_EnaCls_callback(InputEntry *extRef)
 {
   CSWI *inst = extRef->callBackParam;
