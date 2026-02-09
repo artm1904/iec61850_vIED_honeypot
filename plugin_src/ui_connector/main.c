@@ -32,15 +32,9 @@
 typedef enum {
     JSON_TYPE_BOOLEAN,
     JSON_TYPE_INTEGER,
+    JSON_TYPE_BITSTRING,
     JSON_TYPE_FLOAT
 } JsonValueType;
-
-typedef enum {
-    BREAKER_INTERMEDIATE = 0,
-    BREAKER_OPEN    = 1,    // 01
-    BREAKER_CLOSED  = 2,    // 10
-    BREAKER_UNKNOWN = 3
-} BreakerState;
 
 typedef struct JsonNode {
     char *name; // key name
@@ -50,17 +44,6 @@ typedef struct JsonNode {
     JsonValueType type;
     struct JsonNode *next;
 } JsonNode;
-
-typedef struct {
-    double voltage_l1;
-    double voltage_l2;
-    double voltage_l3;
-    double current_l1;
-    double current_l2;
-    double current_l3;
-    BreakerState breaker_state;
-    int trip_active;
-} RelayData;
 
 static const char *socket_path = NULL;
 static JsonNode *UIConfigList = NULL;
@@ -136,7 +119,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             XSWI *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, item, item->Pos_stVal);
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, item, item->Pos_stVal);
             continue;
         }
         if(strncmp(section->entries[i].key,"cbr",3) == 0) // CBR[index], publish state, accept commands
@@ -148,7 +131,7 @@ int init(OpenServerInstance *srv)
                 continue; //if not, give up
             }
             XSWI *item = ln->instance;
-            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, item, item->Pos_stVal);
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, item, item->Pos_stVal);
             continue;
         }
         if(strncmp(section->entries[i].key,"ctr",3) == 0) // CTR[index], publish value
@@ -206,8 +189,10 @@ int init(OpenServerInstance *srv)
                     break;
                     case MMS_INTEGER:
                     case MMS_UNSIGNED:
-                    case MMS_BIT_STRING:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, NULL, attr);
+                    break;
+                    case MMS_BIT_STRING:
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, NULL, attr);
                     break;
                     case MMS_FLOAT:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, NULL, attr);
@@ -333,7 +318,7 @@ int extract_json_string(const char *json, const char *field, char *value, size_t
 /* Check if command matches (looks for "command": in JSON) */
 int is_command(const char *cmd, const char *command_name) {
     char pattern[64];
-    snprintf(pattern, sizeof(pattern), "\"command\":\"%s\"", command_name);
+    snprintf(pattern, sizeof(pattern), "\"command\": \"%s\"", command_name);
     return strstr(cmd, pattern) != NULL;
 }
 
@@ -418,8 +403,7 @@ static void UI_connector_socket_Thread(void * parameter) {
                 if (extract_json_string(buffer, "switch", arg, sizeof(arg)) && arg[0]) {
                     XSWI * xswi = find_xswi(arg);
                     if(xswi) {
-                        if(xswi->XSWI_callback_ln != NULL)
-                            xswi->XSWI_callback_ln(xswi,false);
+                        XSWI_Opn(xswi);
 
                         xasprintf(&response, "{\"status\":\"ok\",\"action\":\"open_switch\",\"switch\":\"%s\"}\n", arg);                  
                     } else {
@@ -434,10 +418,9 @@ static void UI_connector_socket_Thread(void * parameter) {
                 if (extract_json_string(buffer, "switch", arg, sizeof(arg)) && arg[0]) {
                     XSWI * xswi = find_xswi(arg);
                     if(xswi) {
-                        if(xswi->XSWI_callback_ln != NULL)
-                            xswi->XSWI_callback_ln(xswi,true);
+                        XSWI_Cls(xswi);
 
-                        xasprintf(&response, "{\"status\":\"ok\",\"action\":\"open_switch\",\"switch\":\"%s\"}\n", arg);
+                        xasprintf(&response, "{\"status\":\"ok\",\"action\":\"close_switch\",\"switch\":\"%s\"}\n", arg);
                     } else {
                         xasprintf(&response, "{\"status\":\"error\",\"message\":\"switch_not_found\",\"switch\":\"%s\"}\n", arg);
                     }
@@ -495,13 +478,13 @@ static void UI_connector_socket_Thread(void * parameter) {
 char* to_json_string(JsonNode *head) {
     if (!head) {
         /* Empty list returns empty JSON object */
-        char *result = malloc(3);
-        if (result) strcpy(result, "{}");
+        char *result = malloc(4);
+        if (result) strcpy(result, "{}\n");
         return result;
     }
     
     /* First pass: calculate required buffer size */
-    size_t total_size = 2; /* For opening and closing braces */
+    size_t total_size = 4; /* For opening and closing braces, plus newline */
     JsonNode *current = head;
     int count = 0;
     
@@ -513,6 +496,9 @@ char* to_json_string(JsonNode *head) {
         switch (current->type) {
             case JSON_TYPE_BOOLEAN:
                 total_size += 5; /* "true" or "false" */
+                break;
+            case JSON_TYPE_BITSTRING:
+                total_size += 20; /* max bits */
                 break;
             case JSON_TYPE_INTEGER:
                 total_size += 20; /* Max int digits */
@@ -555,6 +541,17 @@ char* to_json_string(JsonNode *head) {
                 sprintf(temp, "%d", MmsValue_toInt32(mmsValue));
                 strcat(json, temp);
                 break;
+            case JSON_TYPE_BITSTRING:
+                sprintf(temp, "%d", MmsValue_getBitStringAsInteger(mmsValue));
+                /*Dbpos pos =  Dbpos_fromMmsValue(mmsValue);
+                switch(pos){
+                    case DBPOS_ON: printf("DbPos: ON, %s\n", temp); break;
+                    case DBPOS_OFF: printf("DbPos: OFF, %s\n", temp); break;
+                    case DBPOS_INTERMEDIATE_STATE: printf("DbPos: INTERMEDIATE, %s\n", temp); break;
+                    case DBPOS_BAD_STATE: printf("DbPos: BAD, %s\n", temp); break;
+                }*/
+                strcat(json, temp);
+                break;
             case JSON_TYPE_FLOAT:
                 sprintf(temp, "%g", MmsValue_toFloat(mmsValue));
                 strcat(json, temp);
@@ -569,7 +566,7 @@ char* to_json_string(JsonNode *head) {
         current = current->next;
     }
     
-    strcat(json, "}");
+    strcat(json, "}\n");
     return json;
 }
 

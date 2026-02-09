@@ -43,16 +43,9 @@ void XSWI_EnaCls_callback(InputEntry *extRef)
 void XSWI_callback_Opn(InputEntry *extRef)
 {
   XSWI * inst = extRef->callBackParam;
-  if(inst->XSWI_callback_ln == NULL)
-    return;
-
   if(MmsValue_getBoolean(extRef->value))
   {
-    if(inst->BlkOpn == true){
-      printf("XSWI: Open command blocked by BlkOpn\n");
-      return;
-    }
-    inst->XSWI_callback_ln(inst, false); // false means open (not conducting)
+    XSWI_Opn(inst);
   }
 }
 
@@ -60,16 +53,9 @@ void XSWI_callback_Opn(InputEntry *extRef)
 void XSWI_callback_Cls(InputEntry *extRef)
 {
   XSWI * inst = extRef->callBackParam;
-  if(inst->XSWI_callback_ln == NULL)
-    return;
-
   if(MmsValue_getBoolean(extRef->value))
   {
-    if(inst->BlkCls == true){
-      printf("XSWI: Close command blocked by BlkCls\n");
-      return;
-    }
-    inst->XSWI_callback_ln(inst, true);// true means closed (conducting)
+    XSWI_Cls(inst);
   }
 }
 
@@ -140,6 +126,30 @@ void *XSWI_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allI
   }
 
   return inst;
+}
+
+void XSWI_Opn(XSWI * inst)
+{
+  if(inst->XSWI_callback_ln == NULL)
+    return;
+
+  if(inst->BlkOpn == true) {
+    printf("XSWI: Open command blocked by BlkOpn\n");
+    return;
+  }
+  inst->XSWI_callback_ln(inst, false); // false means open (not conducting)    
+}
+
+void XSWI_Cls(XSWI * inst)
+{
+  if(inst->XSWI_callback_ln == NULL)
+    return;
+
+  if(inst->BlkCls == true) {
+    printf("XSWI: Close command blocked by BlkCls\n");
+    return;
+  }
+  inst->XSWI_callback_ln(inst, true);// true means closed (conducting)
 }
 
 void XSWI_change_switch(XSWI *inst, Dbpos value)

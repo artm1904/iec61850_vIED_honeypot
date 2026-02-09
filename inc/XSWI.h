@@ -31,11 +31,15 @@ typedef struct sXSWI
 } XSWI;
 
 void *XSWI_init(IedServer server, LogicalNode* ln, Input* input, LinkedList allInputValues);
-void XSWI_change_switch(XSWI *inst, Dbpos value);
+
 int setXSWI_Callback(XSWI *instance, XSWICallback callback);
 
 void XSWI_EnaOpn_callback(InputEntry *extRef);
 void XSWI_EnaCls_callback(InputEntry *extRef);
+
+void XSWI_Opn(XSWI * inst);
+void XSWI_Cls(XSWI * inst);
+void XSWI_change_switch(XSWI *inst, Dbpos value);
 
 #ifdef __cplusplus
 }
