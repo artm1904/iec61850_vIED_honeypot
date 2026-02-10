@@ -404,7 +404,6 @@ static void UI_connector_socket_Thread(void * parameter) {
                     XSWI * xswi = find_xswi(arg);
                     if(xswi) {
                         XSWI_Opn(xswi);
-
                         xasprintf(&response, "{\"status\":\"ok\",\"action\":\"open_switch\",\"switch\":\"%s\"}\n", arg);                  
                     } else {
                         xasprintf(&response, "{\"status\":\"error\",\"message\":\"switch_not_found\",\"switch\":\"%s\"}\n", arg);
@@ -419,7 +418,6 @@ static void UI_connector_socket_Thread(void * parameter) {
                     XSWI * xswi = find_xswi(arg);
                     if(xswi) {
                         XSWI_Cls(xswi);
-
                         xasprintf(&response, "{\"status\":\"ok\",\"action\":\"close_switch\",\"switch\":\"%s\"}\n", arg);
                     } else {
                         xasprintf(&response, "{\"status\":\"error\",\"message\":\"switch_not_found\",\"switch\":\"%s\"}\n", arg);
