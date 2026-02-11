@@ -27,7 +27,7 @@ typedef struct sPDIS
 void PDIS_callback_SMV(void *pdis_inst)
 {
   PDIS *inst = pdis_inst;
-  int i = 0;
+  uint32_t i = 0;
 
   while(i < 4)
   {

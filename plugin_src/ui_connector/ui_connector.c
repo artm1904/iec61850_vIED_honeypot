@@ -52,7 +52,7 @@ JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, Ied
 void free_json_list(JsonNode *head);
 char* to_json_string(JsonNode *head);
 
-static void UI_connector_socket_Thread(void * parameter);
+static void *UI_connector_socket_Thread(void * parameter);
 
 
 int init(OpenServerInstance *srv)
@@ -84,7 +84,7 @@ int init(OpenServerInstance *srv)
     /* Iterate through all key-value pairs */
     printf("\n settings for %s \n", section->section);
     for (int i = 0; i < section->entry_count; i++) {
-        //printf("  %s = ", section->entries[i].key);
+        printf("  %s = ", section->entries[i].key);
          // known keys
         if(strcmp(section->entries[i].key,"socket") == 0)
         {
@@ -94,7 +94,7 @@ int init(OpenServerInstance *srv)
                 continue;
             }
             const char *tmpsocket = config_get_value(section, "socket");
-            const int socketln = strlen(tmpsocket);
+            const size_t socketln = strlen(tmpsocket);
             if(socketln > 256) {
                 printf("ERROR: invalid socket path\n");
                 continue;
@@ -158,7 +158,7 @@ int init(OpenServerInstance *srv)
             create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, item, item->da_V);
             continue;
         }
-        if(strncmp(section->entries[i].key,"set",3) == 0) // Setting[index]_[Name], publish value, accept write
+        if(strncmp(section->entries[i].key,"_",1) == 0) // Setting[index]_[Name], publish value, accept write
         {
             LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
             if (ln == NULL)
@@ -304,7 +304,7 @@ int extract_json_string(const char *json, const char *field, char *value, size_t
         const char *value_end = strchr(value_start, '"');
         if (!value_end) return 0;
         
-        size_t len = value_end - value_start;
+        size_t len = (size_t)(value_end - value_start);
         if (len >= value_size) len = value_size - 1;
         
         strncpy(value, value_start, len);
@@ -327,7 +327,7 @@ bool write_setting(DataAttribute * da,const char * arg2)
     return false;
 }
 
-static void UI_connector_socket_Thread(void * parameter) {
+static void *UI_connector_socket_Thread(void * parameter) {
     int server_fd, client_fd;
     struct sockaddr_un addr;
 
@@ -337,7 +337,7 @@ static void UI_connector_socket_Thread(void * parameter) {
     server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_fd < 0) {
         printf("ERROR: cannot create socket\n");
-        return;
+        return NULL;
     }
     
     /* Remove existing socket file */
@@ -351,7 +351,7 @@ static void UI_connector_socket_Thread(void * parameter) {
     if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         printf("ERROR: cannot bind to path: %s\n", socket_path);
         close(server_fd);
-        return;
+        return NULL;
     }
     
     /* Listen for connections */
@@ -359,7 +359,7 @@ static void UI_connector_socket_Thread(void * parameter) {
         printf("ERROR: cannot listen on socket\n");
         close(server_fd);
         unlink(socket_path);
-        return;
+        return NULL;
     }
 
     while(open_server_running())
@@ -469,7 +469,7 @@ static void UI_connector_socket_Thread(void * parameter) {
     unlink(socket_path);
     
     printf("Server shutdown\n");
-    return;
+    return NULL;
 }
 
 /* Main function to convert linked list to JSON string */

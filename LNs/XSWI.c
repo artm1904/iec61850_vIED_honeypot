@@ -34,7 +34,7 @@ void XSWI_EnaCls_callback(InputEntry *extRef)
     else
       printf("XSWI: BlkCls: false\n");
 
-    IedServer_updateBooleanAttributeValue(inst->server, inst->BlkCls_stVal, inst->BlkCls_stVal);
+    IedServer_updateBooleanAttributeValue(inst->server, inst->BlkCls_stVal, inst->BlkCls);
     InputValueHandleExtensionCallbacks(inst->BlkCls_stVal_callback); // update the associated callbacks with this Data Element
   }
 }

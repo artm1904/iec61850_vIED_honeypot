@@ -26,7 +26,7 @@ typedef struct sPDIF
 void PDIF_callback_SMV(void *pdif_inst)
 {
   PDIF *inst = pdif_inst;
-  int i = 0;
+  uint32_t i = 0;
   while (i < 4) // only trigger on amps.
   {
     double AmpValue1  =  DSP_get_phs(inst->dspI1, i); // get absolute current from dsp
