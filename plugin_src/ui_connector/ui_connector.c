@@ -43,6 +43,9 @@ typedef struct JsonNode {
     DataAttribute* DA_ref;
     JsonValueType type;
     struct JsonNode *next;
+    bool diagramvalue;
+    bool measurementvalue;
+    bool generalvalue;
 } JsonNode;
 
 static const char *socket_path = NULL;
@@ -50,7 +53,7 @@ static JsonNode *UIConfigList = NULL;
 
 JsonNode* create_node(JsonNode **head, const char *name, JsonValueType type, IedServer server, void * inst, DataAttribute* DA_ref);
 void free_json_list(JsonNode *head);
-char* to_json_string(JsonNode *head);
+char* to_json_string(JsonNode *head, bool measurements_enable, bool diagram_enable);
 
 static void *UI_connector_socket_Thread(void * parameter);
 
@@ -120,6 +123,9 @@ int init(OpenServerInstance *srv)
             }
             XSWI *item = ln->instance;
             create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, item, item->Pos_stVal);
+            UIConfigList->diagramvalue = true;
+            UIConfigList->measurementvalue = false;
+            UIConfigList->generalvalue = true;
             continue;
         }
         if(strncmp(section->entries[i].key,"cbr",3) == 0) // CBR[index], publish state, accept commands
@@ -132,6 +138,9 @@ int init(OpenServerInstance *srv)
             }
             XSWI *item = ln->instance;
             create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, item, item->Pos_stVal);
+            UIConfigList->diagramvalue = true;
+            UIConfigList->measurementvalue = false;
+            UIConfigList->generalvalue = true;
             continue;
         }
         if(strncmp(section->entries[i].key,"ctr",3) == 0) // CTR[index], publish value
@@ -144,6 +153,9 @@ int init(OpenServerInstance *srv)
             }
             MMXU *item = ln->instance;
             create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, item, item->da_A);
+            UIConfigList->diagramvalue = true;
+            UIConfigList->measurementvalue = false;
+            UIConfigList->generalvalue = false;
             continue;
         }
         if(strncmp(section->entries[i].key,"vtr",3) == 0) // VTR[index], publish value
@@ -156,9 +168,12 @@ int init(OpenServerInstance *srv)
             }
             MMXU *item = ln->instance;
             create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, item, item->da_V);
+            UIConfigList->diagramvalue = true;
+            UIConfigList->measurementvalue = false;
+            UIConfigList->generalvalue = false;
             continue;
         }
-        if(strncmp(section->entries[i].key,"_",1) == 0) // Setting[index]_[Name], publish value, accept write
+        if(strncmp(section->entries[i].key,"s_",2) == 0) // Setting[index]_[Name], publish value, accept write
         {
             LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
             if (ln == NULL)
@@ -186,16 +201,20 @@ int init(OpenServerInstance *srv)
                 {
                     case MMS_BOOLEAN:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BOOLEAN,srv->server, NULL, attr);
+                        UIConfigList->diagramvalue = false; UIConfigList->measurementvalue = false; UIConfigList->generalvalue = true;
                     break;
                     case MMS_INTEGER:
                     case MMS_UNSIGNED:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_INTEGER,srv->server, NULL, attr);
+                        UIConfigList->diagramvalue = false; UIConfigList->measurementvalue = false; UIConfigList->generalvalue = true;
                     break;
                     case MMS_BIT_STRING:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BITSTRING,srv->server, NULL, attr);
+                        UIConfigList->diagramvalue = false; UIConfigList->measurementvalue = false; UIConfigList->generalvalue = true;
                     break;
                     case MMS_FLOAT:
                         create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, NULL, attr);
+                        UIConfigList->diagramvalue = false; UIConfigList->measurementvalue = false; UIConfigList->generalvalue = true;
                     break;
                     default:
                         printf("ERROR: unsupported MMS type for setting ref %s, type is %d", section->entries[i].values[1], mmsType);
@@ -208,11 +227,53 @@ int init(OpenServerInstance *srv)
 
             continue;
         }
+        if(strncmp(section->entries[i].key,"m_",2) == 0) // Setting[index]_[Name], publish value, accept write
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            if(section->entries[i].value_count > 1)
+            {
+                printf("INFO: DA for setting is %s\n",section->entries[i].values[1]);
+                DataAttribute* attr = (DataAttribute*)ModelNode_getChild((ModelNode*)ln->parent, section->entries[i].values[1]);
+                if (attr == NULL) {
+                    printf("ERROR: failed to get DataAttribute for %s in %s\n",section->entries[i].values[1], section->entries[i].values[0]);
+                    continue;  // Failed to get value
+                }
+                // Get the value
+                MmsValue* mmsValue = IedServer_getAttributeValue(srv->server, attr);
+                
+                if (mmsValue == NULL) {
+                    printf("ERROR: failed to get MmsValue for %s\n",section->entries[i].values[1]);
+                    continue;  // Failed to get value
+                }
+                MmsType mmsType = MmsValue_getType(mmsValue);
+                switch(mmsType)
+                {
+                    case MMS_FLOAT:
+                        create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_FLOAT,srv->server, NULL, attr);
+                        UIConfigList->diagramvalue = false;
+                        UIConfigList->measurementvalue = true;
+                        UIConfigList->generalvalue = false;
+                    break;
+                    default:
+                        printf("ERROR: unsupported MMS type for measurement ref %s, type is %d", section->entries[i].values[1], mmsType);
+                }
+            }
+            else
+            {
+                printf("ERROR: missing DA for measurement %s\n",section->entries[i].key);
+            }
+            continue;
+        }
     }
 
     config_free(&config);
 
-    char * jj = to_json_string(UIConfigList);
+    char * jj = to_json_string(UIConfigList, true, true);
     printf("%s\n",jj);
     free(jj);
     printf("ui_connector module initialised\n");
@@ -395,8 +456,17 @@ static void *UI_connector_socket_Thread(void * parameter) {
             
             /* Process command and build response */ 
             char * response = NULL;        
-            if (is_command(buffer, "get_measurements")) {
-                response = to_json_string(UIConfigList);
+            if (is_command(buffer, "get_values")) {
+                char arg2[64] = "";
+                bool measurements_enable = false;
+                bool diagram_enable = false;
+                if (extract_json_string(buffer, "measurements", arg, sizeof(arg)) && arg[0]) {
+                    measurements_enable = arg[0] == 'T'; // check if string starts with T for True
+                }
+                if (extract_json_string(buffer, "diagram", arg2, sizeof(arg2)) && arg2[0]) {
+                    diagram_enable = arg2[0] == 'T'; // check if string starts with T for True
+                }
+                response = to_json_string(UIConfigList, measurements_enable, diagram_enable);
             }
             else if (is_command(buffer, "open_switch")) {
                 // Try to extract argument 
@@ -473,7 +543,7 @@ static void *UI_connector_socket_Thread(void * parameter) {
 }
 
 /* Main function to convert linked list to JSON string */
-char* to_json_string(JsonNode *head) {
+char* to_json_string(JsonNode *head, bool measurements_enable, bool diagram_enable) {
     if (!head) {
         /* Empty list returns empty JSON object */
         char *result = malloc(4);
@@ -485,8 +555,15 @@ char* to_json_string(JsonNode *head) {
     size_t total_size = 4; /* For opening and closing braces, plus newline */
     JsonNode *current = head;
     int count = 0;
-    
+        
     while (current) {
+        if(!current->generalvalue)
+        {
+            if( ! ((measurements_enable == true && current->measurementvalue == true) || (diagram_enable == true && current->diagramvalue == true))) {
+                current = current->next; // skip if not selected]
+                continue;
+            }
+        }
         /* Add size for "name": */
         total_size += strlen(current->name) + 4; /* quotes + colon + space */
         
@@ -523,6 +600,13 @@ char* to_json_string(JsonNode *head) {
     current = head;
     
     while (current) {
+        if(!current->generalvalue)
+        {
+            if( ! ((measurements_enable == true && current->measurementvalue == true) || (diagram_enable == true && current->diagramvalue == true))) {
+                current = current->next; // skip if not selected]
+                continue;
+            }
+        }
         /* Add name */
         strcat(json, "\"");
         strcat(json, current->name);
