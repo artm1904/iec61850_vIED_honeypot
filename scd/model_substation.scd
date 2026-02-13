@@ -1970,6 +1970,7 @@
 		</LNodeType>
 		<LNodeType lnClass="LLN0" desc="LN0_1" id="LLN0$oscd$_86a723959df7af2e">
 			<DO name="Beh" type="Beh$oscd$_c6ed035c8137b35a"/>
+			<DO name="Loc" type="Loc$oscd$_d915d66d9e42a575"/>
 		</LNodeType>
 		<LNodeType lnClass="LPHD" desc="LPHD_1" id="LPHD$oscd$_8ca3cb769327538e">
 			<DO name="PhyHealth" type="PhyHealth$oscd$_f60d28fe398302cb"/>

@@ -26,6 +26,7 @@
 
 #include "XSWI.h"
 #include "MMXU.h"
+#include "LLN0.h"
 
 #define BUFFER_SIZE 1024
 
@@ -171,6 +172,21 @@ int init(OpenServerInstance *srv)
             UIConfigList->diagramvalue = true;
             UIConfigList->measurementvalue = false;
             UIConfigList->generalvalue = false;
+            continue;
+        }
+        if(strncmp(section->entries[i].key,"loc",3) == 0) // VTR[index], publish value
+        {
+            LogicalNodeClass *ln = getLNClass(model, model_ex, section->entries[i].values[0]);
+            if (ln == NULL)
+            {
+                printf("ERROR: could not parse or find an LN entry with key: %s\n", section->entries[i].values[0]);
+                continue; //if not, give up
+            }
+            LLN0 *item = ln->instance;
+            create_node(&UIConfigList,section->entries[i].key,JSON_TYPE_BOOLEAN,srv->server, item, item->Loc_stVal);
+            UIConfigList->diagramvalue = true;
+            UIConfigList->measurementvalue = false;
+            UIConfigList->generalvalue = true;
             continue;
         }
         if(strncmp(section->entries[i].key,"s_",2) == 0) // Setting[index]_[Name], publish value, accept write
@@ -496,6 +512,31 @@ static void *UI_connector_socket_Thread(void * parameter) {
                     xasprintf(&response, "{\"status\":\"error\",\"message\":\"close_switch missing argument\",\"command\":\"%s\"}\n", buffer);
                 }
             }
+            else if (is_command(buffer, "write_loc")) {
+                // Try to extract argument 
+                JsonNode *node = find_node("loc");
+                if(node && node->inst && node->server) {
+                    char arg2[64] = "";
+                    if (extract_json_string(buffer, "value", arg2, sizeof(arg2)) && arg2[0]) {
+                            
+                        if( arg2[0] == 'T' ) {
+                            LLN0_SetLoc(node->inst,true);
+                            xasprintf(&response, "{\"status\":\"ok\",\"action\":\"write_loc\",\"value\":\"%s\"}\n", arg2);
+                        }
+                        else if( arg2[0] == 'F' ) {
+                            LLN0_SetLoc(node->inst,false);
+                            xasprintf(&response, "{\"status\":\"ok\",\"action\":\"write_loc\",\"value\":\"%s\"}\n", arg2);
+                        }
+                        else
+                            xasprintf(&response, "{\"status\":\"error\",\"message\":\"write_loc_failed\",\"value\":\"%s\"}\n", arg2);
+
+                    } else {
+                        xasprintf(&response, "{\"status\":\"error\",\"message\":\"value_missing\"}\n");
+                    }
+                } else {
+                    xasprintf(&response, "{\"status\":\"error\",\"message\":\"loc not found or invalid\"}\n");
+                }
+            }
             else if (is_command(buffer, "write_setting")) {
                 // Try to extract argument 
                 if (extract_json_string(buffer, "element", arg, sizeof(arg)) && arg[0]) {
@@ -503,10 +544,12 @@ static void *UI_connector_socket_Thread(void * parameter) {
                     if(node && node->DA_ref && node->server) {
                         char arg2[64] = "";
                         if (extract_json_string(buffer, "value", arg2, sizeof(arg2)) && arg2[0]) {
+
                             if( IecServer_setDataPointFromString(node->server, node->DA_ref, arg2) )
                                 xasprintf(&response, "{\"status\":\"ok\",\"action\":\"write_setting\",\"element\":\"%s\",\"value\":\"%s\"}\n", arg, arg2);
                             else
                                 xasprintf(&response, "{\"status\":\"error\",\"message\":\"write_setting_failed\",\"element\":\"%s\",\"value\":\"%s\"}\n", arg, arg2);
+
                         } else {
                             xasprintf(&response, "{\"status\":\"error\",\"message\":\"value_missing\",\"element\":\"%s\"}\n", arg);
                         }
