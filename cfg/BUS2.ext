@@ -54,16 +54,16 @@ CL(TCTR);
 LN(TR2TCTR4){
 CL(TCTR);
 }
-LN(B1TVTR1){
+LN(B2TVTR1){
 CL(TVTR);
 }
-LN(B1TVTR2){
+LN(B2TVTR2){
 CL(TVTR);
 }
-LN(B1TVTR3){
+LN(B2TVTR3){
 CL(TVTR);
 }
-LN(B1TVTR4){
+LN(B2TVTR4){
 CL(TVTR);
 }
 LN(MMXU1){
@@ -105,10 +105,10 @@ ER(sample_a4 BUS2LD1/TR2TCTR4.AmpSv.instMag.i MMXU_Amp4 Poll BUS2/);
 LN(MMXU5){
 CL(MMXU);
 IN{
-ER(sample_v1 BUS2LD1/B1TVTR1.VolSv.instMag.i MMXU_Vol1 Poll BUS2/);
-ER(sample_v2 BUS2LD1/B1TVTR2.VolSv.instMag.i MMXU_Vol2 Poll BUS2/);
-ER(sample_v3 BUS2LD1/B1TVTR3.VolSv.instMag.i MMXU_Vol3 Poll BUS2/);
-ER(sample_v4 BUS2LD1/B1TVTR4.VolSv.instMag.i MMXU_Vol4 Poll BUS2/);
+ER(sample_v1 BUS2LD1/B2TVTR1.VolSv.instMag.i MMXU_Vol1 Poll BUS2/);
+ER(sample_v2 BUS2LD1/B2TVTR2.VolSv.instMag.i MMXU_Vol2 Poll BUS2/);
+ER(sample_v3 BUS2LD1/B2TVTR3.VolSv.instMag.i MMXU_Vol3 Poll BUS2/);
+ER(sample_v4 BUS2LD1/B2TVTR4.VolSv.instMag.i MMXU_Vol4 Poll BUS2/);
 }
 }
 LN(PDIF1){

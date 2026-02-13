@@ -1473,10 +1473,10 @@
 					<LN lnClass="TCTR" lnType="TCTR$oscd$_5b652afdf7c13340" inst="2" prefix="TR2"/>
 					<LN lnClass="TCTR" lnType="TCTR$oscd$_5b652afdf7c13340" inst="3" prefix="TR2"/>
 					<LN lnClass="TCTR" lnType="TCTR$oscd$_5b652afdf7c13340" inst="4" prefix="TR2"/>
-					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="1" prefix="B1"/>
-					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="2" prefix="B1"/>
-					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="3" prefix="B1"/>
-					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="4" prefix="B1"/>
+					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="1" prefix="B2"/>
+					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="2" prefix="B2"/>
+					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="3" prefix="B2"/>
+					<LN lnClass="TVTR" lnType="TVTR$oscd$_e990c540f6cd3155" inst="4" prefix="B2"/>
 					<LN lnClass="MMXU" lnType="MMXU$oscd$_3abca1c29963576c" inst="1" prefix="">
 						<Inputs>
 							<ExtRef intAddr="MMXU_Amp1" desc="sample_a1" iedName="BUS2" ldInst="LD1" prefix="F1" lnClass="TCTR" lnInst="1" doName="AmpSv" daName="instMag.i" serviceType="Poll"/>
@@ -1511,10 +1511,10 @@
 					</LN>
 					<LN lnClass="MMXU" lnType="MMXU$oscd$_3abca1c29963576c" inst="5" prefix="">
 						<Inputs>
-							<ExtRef intAddr="MMXU_Vol1" desc="sample_v1" iedName="BUS2" ldInst="LD1" prefix="B1" lnClass="TVTR" lnInst="1" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
-							<ExtRef intAddr="MMXU_Vol2" desc="sample_v2" iedName="BUS2" ldInst="LD1" prefix="B1" lnClass="TVTR" lnInst="2" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
-							<ExtRef intAddr="MMXU_Vol3" desc="sample_v3" iedName="BUS2" ldInst="LD1" prefix="B1" lnClass="TVTR" lnInst="3" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
-							<ExtRef intAddr="MMXU_Vol4" desc="sample_v4" iedName="BUS2" ldInst="LD1" prefix="B1" lnClass="TVTR" lnInst="4" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
+							<ExtRef intAddr="MMXU_Vol1" desc="sample_v1" iedName="BUS2" ldInst="LD1" prefix="B2" lnClass="TVTR" lnInst="1" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
+							<ExtRef intAddr="MMXU_Vol2" desc="sample_v2" iedName="BUS2" ldInst="LD1" prefix="B2" lnClass="TVTR" lnInst="2" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
+							<ExtRef intAddr="MMXU_Vol3" desc="sample_v3" iedName="BUS2" ldInst="LD1" prefix="B2" lnClass="TVTR" lnInst="3" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
+							<ExtRef intAddr="MMXU_Vol4" desc="sample_v4" iedName="BUS2" ldInst="LD1" prefix="B2" lnClass="TVTR" lnInst="4" doName="VolSv" daName="instMag.i" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 
