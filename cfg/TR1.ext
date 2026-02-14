@@ -54,12 +54,14 @@ ER(sample_a4 TR1LD1/TCTR4.AmpSv.instMag.i PTOC_Amp4 Poll TR1/);
 LN(CSWI1){
 CL(CSWI);
 IN{
+ER(Local_Remote TR1LD1/XCBR1.Loc.stVal Loc Poll TR1/);
 ER(xcbr_status TR1LD1/XCBR1.Pos.stVal stval Poll TR1/);
 }
 }
 LN(CSWI2){
 CL(CSWI);
 IN{
+ER(Local_Remote TR1LD1/XSWI2.Loc.stVal Loc Poll TR1/);
 ER(xcbr_status TR1LD1/XSWI2.Pos.stVal stval Poll TR1/);
 ER(interlock_open TR1LD1/CILO1.EnaOpn.stVal EnaOpn Poll TR1/);
 ER(interlock_close TR1LD1/CILO1.EnaCls.stVal EnaCls Poll TR1/);
@@ -68,6 +70,7 @@ ER(interlock_close TR1LD1/CILO1.EnaCls.stVal EnaCls Poll TR1/);
 LN(CSWI3){
 CL(CSWI);
 IN{
+ER(Local_Remote TR1LD1/XSWI3.Loc.stVal Loc Poll TR1/);
 ER(xcbr_status TR1LD1/XSWI3.Pos.stVal stval Poll TR1/);
 ER(interlock_open TR1LD1/CILO1.EnaOpn.stVal EnaOpn Poll TR1/);
 ER(interlock_close TR1LD1/CILO1.EnaCls.stVal EnaCls Poll TR1/);
@@ -84,6 +87,7 @@ ER(PTOC_trip TR1LD1/PTOC1.Op.general Op3 Poll TR1/);
 LN(XCBR1){
 CL(XCBR);
 IN{
+ER(Local_Remote TR1LD1/LLN0.Loc.stVal Loc Poll TR1/);
 ER(Trip TR1LD1/PTRC1.Tr.general Tr Poll TR1/);
 ER(Operate TR1LD1/CSWI1.OpOpn.general OpOpn Poll TR1/);
 ER(Operate TR1LD1/CSWI1.OpCls.general OpCls Poll TR1/);
@@ -98,6 +102,7 @@ ER(xcbr_status TR1LD1/XCBR1.Pos.stVal stval Poll TR1/);
 LN(XSWI2){
 CL(XSWI);
 IN{
+ER(Local_Remote TR1LD1/LLN0.Loc.stVal Loc Poll TR1/);
 ER(Operate TR1LD1/CSWI2.OpOpn.general OpOpn Poll TR1/);
 ER(Operate TR1LD1/CSWI2.OpCls.general OpCls Poll TR1/);
 ER(interlock_open TR1LD1/CILO1.EnaOpn.stVal EnaOpn Poll TR1/);
@@ -107,6 +112,7 @@ ER(interlock_close TR1LD1/CILO1.EnaCls.stVal EnaCls Poll TR1/);
 LN(XSWI3){
 CL(XSWI);
 IN{
+ER(Local_Remote TR1LD1/LLN0.Loc.stVal Loc Poll TR1/);
 ER(Operate TR1LD1/CSWI3.OpOpn.general OpOpn Poll TR1/);
 ER(Operate TR1LD1/CSWI3.OpCls.general OpCls Poll TR1/);
 ER(interlock_open TR1LD1/CILO1.EnaOpn.stVal EnaOpn Poll TR1/);

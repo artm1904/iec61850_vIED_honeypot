@@ -54,12 +54,14 @@ ER(sample_a4 FEED2LD1/TCTR4.AmpSv.instMag.i PTOC_Amp4 Poll FEED2/);
 LN(CSWI1){
 CL(CSWI);
 IN{
+ER(Local_Remote FEED2LD1/XCBR1.Loc.stVal Loc Poll FEED2/);
 ER(xcbr_status FEED2LD1/XCBR1.Pos.stVal stval Poll FEED2/);
 }
 }
 LN(CSWI2){
 CL(CSWI);
 IN{
+ER(Local_Remote FEED2LD1/XSWI2.Loc.stVal Loc Poll FEED2/);
 ER(xcbr_status FEED2LD1/XSWI2.Pos.stVal stval Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
 ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
@@ -68,6 +70,7 @@ ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
 LN(CSWI3){
 CL(CSWI);
 IN{
+ER(Local_Remote FEED2LD1/XSWI3.Loc.stVal Loc Poll FEED2/);
 ER(xcbr_status FEED2LD1/XSWI3.Pos.stVal stval Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
 ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
@@ -76,6 +79,7 @@ ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
 LN(CSWI4){
 CL(CSWI);
 IN{
+ER(Local_Remote FEED2LD1/XSWI4.Loc.stVal Loc Poll FEED2/);
 ER(xcbr_status FEED2LD1/XSWI4.Pos.stVal stval Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
 ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
@@ -92,6 +96,7 @@ ER(PTOC_trip FEED2LD1/PTOC1.Op.general Op3 Poll FEED2/);
 LN(XCBR1){
 CL(XCBR);
 IN{
+ER(Local_Remote FEED2LD1/LLN0.Loc.stVal Loc Poll FEED2/);
 ER(Trip FEED2LD1/PTRC1.Tr.general Tr Poll FEED2/);
 ER(Operate FEED2LD1/CSWI1.OpOpn.general OpOpn Poll FEED2/);
 ER(Operate FEED2LD1/CSWI1.OpCls.general OpCls Poll FEED2/);
@@ -106,6 +111,7 @@ ER(xcbr_status FEED2LD1/XCBR1.Pos.stVal stval Poll FEED2/);
 LN(XSWI2){
 CL(XSWI);
 IN{
+ER(Local_Remote FEED2LD1/LLN0.Loc.stVal Loc Poll FEED2/);
 ER(Operate FEED2LD1/CSWI2.OpOpn.general OpOpn Poll FEED2/);
 ER(Operate FEED2LD1/CSWI2.OpCls.general OpCls Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
@@ -115,6 +121,7 @@ ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
 LN(XSWI3){
 CL(XSWI);
 IN{
+ER(Local_Remote FEED2LD1/LLN0.Loc.stVal Loc Poll FEED2/);
 ER(Operate FEED2LD1/CSWI3.OpOpn.general OpOpn Poll FEED2/);
 ER(Operate FEED2LD1/CSWI3.OpCls.general OpCls Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
@@ -124,6 +131,7 @@ ER(interlock_close FEED2LD1/CILO1.EnaCls.stVal EnaCls Poll FEED2/);
 LN(XSWI4){
 CL(XSWI);
 IN{
+ER(Local_Remote FEED2LD1/LLN0.Loc.stVal Loc Poll FEED2/);
 ER(Operate FEED2LD1/CSWI4.OpOpn.general OpOpn Poll FEED2/);
 ER(Operate FEED2LD1/CSWI4.OpCls.general OpCls Poll FEED2/);
 ER(interlock_open FEED2LD1/CILO1.EnaOpn.stVal EnaOpn Poll FEED2/);
