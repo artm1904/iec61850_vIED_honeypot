@@ -1019,6 +1019,7 @@
 						</DOI>
 						<Inputs>
 							<ExtRef intAddr="stval" desc="xcbr_status" iedName="FEED1" ldInst="LD1" lnClass="XCBR" lnInst="1" doName="Pos" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="XCBR" lnInst="1" doName="Loc" daName="stVal" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 					<LN lnClass="CSWI" lnType="CSWI$oscd$_a89dcc3919082155" inst="2" prefix="">
@@ -1029,6 +1030,7 @@
 						</DOI>
 						<Inputs>
 							<ExtRef intAddr="stval" desc="xcbr_status" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="2" doName="Pos" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="2" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
@@ -1041,6 +1043,7 @@
 						</DOI>
 						<Inputs>
 							<ExtRef intAddr="stval" desc="xcbr_status" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="3" doName="Pos" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="3" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
@@ -1053,6 +1056,7 @@
 						</DOI>
 						<Inputs>
 							<ExtRef intAddr="stval" desc="xcbr_status" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="4" doName="Pos" daName="stVal" serviceType="Poll"/>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="4" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="EnaCls" desc="interlock_close" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaCls" daName="stVal" serviceType="Poll"/>
 						</Inputs>
@@ -1066,6 +1070,7 @@
 					</LN>
 					<LN lnClass="XCBR" lnType="XCBR$oscd$_420e2f9e111e8bf2" inst="1" prefix="">
 						<Inputs>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="LLN0" lnInst="" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="Tr" desc="Trip" iedName="FEED1" ldInst="LD1" lnClass="PTRC" lnInst="1" doName="Tr" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="1" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="1" doName="OpCls" daName="general" serviceType="Poll"/>
@@ -1078,6 +1083,7 @@
 					</LN>
 					<LN lnClass="XSWI" lnType="XSWI$oscd$_430901aa6c264cc1" inst="2" prefix="">
 						<Inputs>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="LLN0" lnInst="" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="2" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="2" doName="OpCls" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
@@ -1086,6 +1092,7 @@
 					</LN>
 					<LN lnClass="XSWI" lnType="XSWI$oscd$_430901aa6c264cc1" inst="3" prefix="">
 						<Inputs>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="LLN0" lnInst="" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="3" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="3" doName="OpCls" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
@@ -1094,6 +1101,7 @@
 					</LN>
 					<LN lnClass="XSWI" lnType="XSWI$oscd$_430901aa6c264cc1" inst="4" prefix="">
 						<Inputs>
+							<ExtRef intAddr="Loc" desc="Local_Remote" iedName="FEED1" ldInst="LD1" lnClass="LLN0" lnInst="" doName="Loc" daName="stVal" serviceType="Poll"/>
 							<ExtRef intAddr="OpOpn" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="4" doName="OpOpn" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="OpCls" desc="Operate" iedName="FEED1" ldInst="LD1" lnClass="CSWI" lnInst="4" doName="OpCls" daName="general" serviceType="Poll"/>
 							<ExtRef intAddr="EnaOpn" desc="interlock_open" iedName="FEED1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
