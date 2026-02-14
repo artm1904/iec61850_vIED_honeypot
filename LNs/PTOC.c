@@ -188,7 +188,7 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   };
 
   // some sane defaults
-  inst->StrVal = 100; // 100 Amps
+  inst->StrVal = 200; // 100 Amps
   inst->TmMult = 0.1f; // multiplier 0.1
   inst->MinOpTmms = 200; // 200 ms
   inst->MaxOpTmms = 800; // 800 ms 
