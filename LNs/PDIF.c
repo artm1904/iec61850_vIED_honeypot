@@ -46,24 +46,7 @@ typedef struct sPDIF
 
 } PDIF;
 
-int32_t extract_last_index(const char *str) {
-    if (!str) return -1;
 
-    const char *last_underscore = strrchr(str, '_');
-    if (!last_underscore || *(last_underscore + 1) == '\0') return -1;
-
-    // Use atoi for simplicity; it returns 0 for invalid numbers, so we need a check
-    int val = atoi(last_underscore + 1);
-
-    // Check that val matches the digits (prevents atoi silently parsing "2abc" as 2)
-    const char *p = last_underscore + 1;
-    while (*p) {
-        if (*p < '0' || *p > '9') return -1;
-        p++;
-    }
-
-    return val;
-}
 
 void PDIF_set_swi_in(InputEntry *extRef)
 {
@@ -125,7 +108,7 @@ void PDIF_callback_SMV(void *pdif_inst)
     // Timing logic (MinOpTmms)
   if (operate) {
       inst->operateTimer_ms += inst->samplePeriod_ms;
-      if (inst->operateTimer_ms >= inst->MinOpTmms)
+      if (inst->operateTimer_ms >= inst->MinOpTmms && inst->trip == false)
       {
         printf("PDIF: treshold reached\n");
         MmsValue *tripValue = MmsValue_newBoolean(true);
@@ -137,7 +120,11 @@ void PDIF_callback_SMV(void *pdif_inst)
         inst->trip = true;
         // if so send to internal PTRC
       }
-  } else {
+  } 
+  else 
+  {
+    inst->operateTimer_ms = 0.0f;
+    if (inst->trip == true){
       // printf("PDIF: treshold NOT reached\n");
       MmsValue *tripValue = MmsValue_newBoolean(false);
 
@@ -147,8 +134,8 @@ void PDIF_callback_SMV(void *pdif_inst)
       MmsValue_delete(tripValue);
       // if so send to internal PTRC
       inst->trip = false;
-      inst->operateTimer_ms = 0.0f;
-  }
+    }
+  } 
 }
 
 void * PDIF_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allInputValues)

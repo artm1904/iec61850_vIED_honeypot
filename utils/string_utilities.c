@@ -23,6 +23,25 @@
 
 #include "libiec61850_platform_includes.h"
 
+int32_t extract_last_index(const char *str) {
+    if (!str) return -1;
+
+    const char *last_underscore = strrchr(str, '_');
+    if (!last_underscore || *(last_underscore + 1) == '\0') return -1;
+
+    // Use atoi for simplicity; it returns 0 for invalid numbers, so we need a check
+    int val = atoi(last_underscore + 1);
+
+    // Check that val matches the digits (prevents atoi silently parsing "2abc" as 2)
+    const char *p = last_underscore + 1;
+    while (*p) {
+        if (*p < '0' || *p > '9') return -1;
+        p++;
+    }
+
+    return val;
+}
+
 char*
 StringUtils_copySubString(char* startPos, char* endPos)
 {

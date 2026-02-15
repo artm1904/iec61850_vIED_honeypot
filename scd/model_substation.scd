@@ -1063,8 +1063,8 @@
 					</LN>
 					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
 						<Inputs>
-							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
-							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
+							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PTRC" lnInst="1" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
+							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PTRC" lnInst="1" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
 							<ExtRef intAddr="Op3" desc="PTOC_trip" iedName="FEED1" ldInst="LD1" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
 						</Inputs>
 					</LN>
@@ -1252,8 +1252,8 @@
 					</LN>
 					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
 						<Inputs>
-							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
-							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
+							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PTRC" lnInst="2" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
+							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PTRC" lnInst="2" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
 							<ExtRef intAddr="Op3" desc="PTOC_trip" iedName="FEED2" ldInst="LD1" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
 						</Inputs>
 					</LN>
@@ -1349,6 +1349,10 @@
 					<LN0 lnClass="LLN0" inst="" lnType="LLN0$oscd$_86a723959df7af2e">
 						<DataSet name="Bus1TripEvent">
 							<FCDA ldInst="LD1" prefix="" lnClass="PDIF" lnInst="1" doName="Op" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="1" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="2" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="3" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="4" doName="Tr" daName="general" fc="ST"/>
 						</DataSet>
 						<GSEControl name="Bus1TripEventCb" confRev="0" type="GOOSE" appID="0003" datSet="Bus1TripEvent"/>
 					</LN0>
@@ -1441,6 +1445,52 @@
 						</Inputs>
 					</LN>
 
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="1" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="3" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Feed1SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="2" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="FEED2" ldInst="LD1" lnClass="XSWI" lnInst="3" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Feed2SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="3" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="TR1" ldInst="LD1" lnClass="XSWI" lnInst="3" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo1SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="4" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="TR2" ldInst="LD1" lnClass="XSWI" lnInst="3" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo2SwiPosCtl"/>
+						</Inputs>
+					</LN>
+
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="2" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="3" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="4" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS1" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+
 				</LDevice>
 			</Server>
 		</AccessPoint>
@@ -1469,6 +1519,10 @@
 					<LN0 lnClass="LLN0" inst="" lnType="LLN0$oscd$_86a723959df7af2e">
 						<DataSet name="Bus2TripEvent">
 							<FCDA ldInst="LD1" prefix="" lnClass="PDIF" lnInst="1" doName="Op" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="1" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="2" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="3" doName="Tr" daName="general" fc="ST"/>
+							<FCDA ldInst="LD1" prefix="" lnClass="PTRC" lnInst="4" doName="Tr" daName="general" fc="ST"/>
 						</DataSet>
 						<GSEControl name="Bus2TripEventCb" confRev="0" type="GOOSE" appID="0003" datSet="Bus2TripEvent"/>
 					</LN0>
@@ -1557,6 +1611,52 @@
 							<ExtRef intAddr="PDIF_in_swi_1" serviceType="GOOSE" iedName="FEED2" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Feed2SwiPosCtl"/>
 							<ExtRef intAddr="PDIF_out_swi_0" serviceType="GOOSE" iedName="TR1" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo1SwiPosCtl"/>
 							<ExtRef intAddr="PDIF_out_swi_1" serviceType="GOOSE" iedName="TR2" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo2SwiPosCtl"/>
+						</Inputs>
+					</LN>
+
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="1" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="FEED1" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Feed1SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="2" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="FEED2" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Feed2SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="3" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="TR1" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo1SwiPosCtl"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="CILO" lnType="CILO$oscd$_aa7ec79ef27309b1" inst="4" prefix="">
+						<Inputs>
+							<ExtRef intAddr="in_nor_0" serviceType="GOOSE" iedName="TR2" ldInst="LD1" lnClass="XSWI" lnInst="4" prefix="" doName="Pos" daName="stVal" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Trafo2SwiPosCtl"/>
+						</Inputs>
+					</LN>
+
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS2" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="2" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS2" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="3" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS2" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
+						</Inputs>
+					</LN>
+					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="4" prefix="">
+						<Inputs>
+							<ExtRef intAddr="Op1" desc="PDIF_trip" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
+							<ExtRef intAddr="EnaOpn" desc="CILO_EnaOpn" iedName="BUS2" ldInst="LD1" lnClass="CILO" lnInst="1" doName="EnaOpn" daName="stVal" serviceType="Poll"/>
 						</Inputs>
 					</LN>
 
@@ -1666,8 +1766,8 @@
 					</LN>
 					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
 						<Inputs>
-							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
-							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
+							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PTRC" lnInst="3" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
+							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PTRC" lnInst="3" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
 							<ExtRef intAddr="Op3" desc="PTOC_trip" iedName="TR1" ldInst="LD1" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
 						</Inputs>
 					</LN>
@@ -1832,8 +1932,8 @@
 					</LN>
 					<LN lnClass="PTRC" lnType="PTRC$oscd$_a60344357bbc2c12" inst="1" prefix="">
 						<Inputs>
-							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
-							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PDIF" lnInst="1" prefix="" doName="Op" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
+							<ExtRef intAddr="Op1" serviceType="GOOSE" iedName="BUS1" ldInst="LD1" lnClass="PTRC" lnInst="4" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus1TripEventCn"/>
+							<ExtRef intAddr="Op2" serviceType="GOOSE" iedName="BUS2" ldInst="LD1" lnClass="PTRC" lnInst="4" prefix="" doName="Tr" daName="general" srcLDInst="LD1" srcPrefix="" srcLNClass="LLN0" srcCBName="Bus2TripEventCn"/>
 							<ExtRef intAddr="Op3" desc="PTOC_trip" iedName="TR2" ldInst="LD1" lnClass="PTOC" lnInst="1" doName="Op" daName="general" serviceType="Poll"/>
 						</Inputs>
 					</LN>
