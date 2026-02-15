@@ -1000,7 +1000,7 @@
 						<DOI name="StrVal">
 							<SDI name="setMag">
 								<DAI name="f">
-									<Val>42.3</Val>
+									<Val>10000.3</Val>
 								</DAI>
 							</SDI>
 						</DOI>
@@ -1716,7 +1716,7 @@
 						<DOI name="StrVal">
 							<SDI name="setMag">
 								<DAI name="f">
-									<Val>42.3</Val>
+									<Val>10000.3</Val>
 								</DAI>
 							</SDI>
 						</DOI>

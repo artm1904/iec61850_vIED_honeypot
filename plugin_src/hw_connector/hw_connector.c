@@ -441,7 +441,7 @@ static void *hw_connector_SMV_Thread(void *parameter) // TODO: sync with the thr
             const double phase_deg = (hwconf->hwindex % 3) * 120.0;
             const double phase_rad = phase_deg * M_PI / 180.0;
 
-            const double scale = hwconf->hwindex < 12? 0.1 : 10.0;
+            const double scale = 1.0;//hwconf->hwindex < 12? 0.01 : 10.0;
             if (magnitude > 0.001)
             {
                 double amp = magnitude * sqrt(2); // RMS to peak
