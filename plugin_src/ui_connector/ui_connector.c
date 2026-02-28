@@ -24,6 +24,9 @@
 #include <time.h>
 #include <math.h>
 
+#include <sys/stat.h>
+#include <grp.h>
+
 #include "XSWI.h"
 #include "MMXU.h"
 #include "LLN0.h"
@@ -431,6 +434,9 @@ static void *UI_connector_socket_Thread(void * parameter) {
         return NULL;
     }
     
+    chmod(socket_path, 0770);    // owner+group can read/write
+    chown(socket_path, 0, 1000); // set group
+
     /* Listen for connections */
     if (listen(server_fd, 1) < 0) {
         printf("ERROR: cannot listen on socket\n");
