@@ -670,11 +670,11 @@ char* to_json_string(JsonNode *head, bool measurements_enable, bool diagram_enab
                 sprintf(temp, "%d", MmsValue_getBitStringAsInteger(mmsValue));
                 /*Dbpos pos =  Dbpos_fromMmsValue(mmsValue);
                 switch(pos){
-                    case DBPOS_ON: printf("DbPos: ON, %s\n", temp); break;
-                    case DBPOS_OFF: printf("DbPos: OFF, %s\n", temp); break;
-                    case DBPOS_INTERMEDIATE_STATE: printf("DbPos: INTERMEDIATE, %s\n", temp); break;
-                    case DBPOS_BAD_STATE: printf("DbPos: BAD, %s\n", temp); break;
-                }*/
+                    case DBPOS_ON: printf("DbPos: ON, int=%s, (dbpos=%i)\n", temp,(int)pos); break;
+                    case DBPOS_OFF: printf("DbPos: OFF, int=%s, (dbpos=%i)\n", temp,(int)pos); break;
+                    case DBPOS_INTERMEDIATE_STATE: printf("DbPos: INTERMEDIATE, int=%s, (dbpos=%i)\n", temp,(int)pos); break;
+                    case DBPOS_BAD_STATE: printf("DbPos: BAD, int=%s, (dbpos=%i)\n", temp,(int)pos); break;
+                }//*/
                 strcat(json, temp);
                 break;
             case JSON_TYPE_FLOAT:
