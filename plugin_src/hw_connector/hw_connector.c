@@ -310,7 +310,7 @@ static void *receiver_thread(int * arg) {
                         //printf("\n[BROADCAST] %s\n", event_data);
                         // Distribute event to XSWI/XCBR/TVTR/TCTR
                         if(strncmp(event_data, "DATA", 4) == 0){
-                            printf("recv: %s\n", &event_data[5]); //Avalue,value,... Sbyte,byte,... A=analog value, S=shortcitcuit yes/no        A0,1,2,3,4,5,6,7,8,9,10,11 S01,02,03,04,05,06
+                            //printf("recv: %s\n", &event_data[5]); //Avalue,value,... Sbyte,byte,... A=analog value, S=shortcitcuit yes/no        A0,1,2,3,4,5,6,7,8,9,10,11 S01,02,03,04,05,06
                             if(event_data[5]== 'A')
                             {
                                 char *charpos = &event_data[6];
