@@ -696,7 +696,12 @@ char* to_json_string(JsonNode *head, bool measurements_enable, bool diagram_enab
         
         current = current->next;
     }
-    
+    //if we, by accident printed ', ', but the next items were all not candidates to be printed, we may print invalid json by having it right before the '}'
+    size_t len = strlen(json);
+    if (len >= 2 && json[len - 2] == ',' && json[len - 1] == ' ') {
+        json[len - 2] = ' ';  // replace ',' with space
+    }
+    //close the json string
     strcat(json, "}\n");
     return json;
 }
