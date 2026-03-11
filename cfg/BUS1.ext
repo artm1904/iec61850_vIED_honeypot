@@ -171,21 +171,21 @@ LN(PTRC2){
 CL(PTRC);
 IN{
 ER(PDIF_trip BUS1LD1/PDIF1.Op.general Op1 Poll BUS1/);
-ER(CILO_EnaOpn BUS1LD1/CILO1.EnaOpn.stVal EnaOpn Poll BUS1/);
+ER(CILO_EnaOpn BUS1LD1/CILO2.EnaOpn.stVal EnaOpn Poll BUS1/);
 }
 }
 LN(PTRC3){
 CL(PTRC);
 IN{
 ER(PDIF_trip BUS1LD1/PDIF1.Op.general Op1 Poll BUS1/);
-ER(CILO_EnaOpn BUS1LD1/CILO1.EnaOpn.stVal EnaOpn Poll BUS1/);
+ER(CILO_EnaOpn BUS1LD1/CILO3.EnaOpn.stVal EnaOpn Poll BUS1/);
 }
 }
 LN(PTRC4){
 CL(PTRC);
 IN{
 ER(PDIF_trip BUS1LD1/PDIF1.Op.general Op1 Poll BUS1/);
-ER(CILO_EnaOpn BUS1LD1/CILO1.EnaOpn.stVal EnaOpn Poll BUS1/);
+ER(CILO_EnaOpn BUS1LD1/CILO4.EnaOpn.stVal EnaOpn Poll BUS1/);
 }
 }
 }
