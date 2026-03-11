@@ -50,16 +50,19 @@ void PTRC_input_Tr_callback(InputEntry *extRef)
     firstExtRef = firstExtRef->sibling;
   }
   // we reach here if none of the Op values are currently True
-  printf("PTRC: trip cleared from Op\n"); //
-  MmsValue *tripValue = MmsValue_newBoolean(false);
+  if( inst->tripstate == true )
+  {
+    printf("PTRC: trip cleared from Op\n"); //
+    MmsValue *tripValue = MmsValue_newBoolean(false);
 
-  IedServer_updateAttributeValue(inst->server, inst->Op_general, tripValue); // set the combined Op values
-  InputValueHandleExtensionCallbacks(inst->Op_general_callback); // update the associated callbacks with this Data Element
+    IedServer_updateAttributeValue(inst->server, inst->Op_general, tripValue); // set the combined Op values
+    InputValueHandleExtensionCallbacks(inst->Op_general_callback); // update the associated callbacks with this Data Element
 
-  IedServer_updateAttributeValue(inst->server, inst->Tr_general, tripValue);
-  InputValueHandleExtensionCallbacks(inst->Tr_general_callback); // update the associated callbacks with this Data Element
-  MmsValue_delete(tripValue);
-  inst->tripstate = false;
+    IedServer_updateAttributeValue(inst->server, inst->Tr_general, tripValue);
+    InputValueHandleExtensionCallbacks(inst->Tr_general_callback); // update the associated callbacks with this Data Element
+    MmsValue_delete(tripValue);
+    inst->tripstate = false;
+  }
 }
 
 // receive trip command from input LN's
@@ -92,14 +95,17 @@ void PTRC_input_Str_callback(InputEntry *extRef)
     firstExtRef = firstExtRef->sibling;
   }
   // we reach here if none of the Op values are currently True
-  printf("PTRC: fault cleared from Str\n"); //
-  MmsValue *StrValue = MmsValue_newBoolean(false);
+  if(inst->Strstate == true)
+  {
+    printf("PTRC: fault cleared from Str\n"); //
+    MmsValue *StrValue = MmsValue_newBoolean(false);
 
-  IedServer_updateAttributeValue(inst->server, inst->Str_general, StrValue); // set the combined Op values
-  InputValueHandleExtensionCallbacks(inst->Str_general_callback); // update the associated callbacks with this Data Element
+    IedServer_updateAttributeValue(inst->server, inst->Str_general, StrValue); // set the combined Op values
+    InputValueHandleExtensionCallbacks(inst->Str_general_callback); // update the associated callbacks with this Data Element
 
-  MmsValue_delete(StrValue);
-  inst->Strstate = false;
+    MmsValue_delete(StrValue);
+    inst->Strstate = false;
+  }
 }
 
 // receive trip command from input LN's

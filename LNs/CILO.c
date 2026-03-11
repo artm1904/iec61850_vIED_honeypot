@@ -73,7 +73,7 @@ void SetEnaCls(CILO * inst,bool state)
 bool AND_inputs_all_true(CILO * inst) // all values are true means block operation, any value false means allow
 {
   if(inst->and_values_count == 0) // ignore this logic if not used, by always returning false for blocking
-    false;
+    return false;
 
   for(uint32_t i = 0; i < inst->and_values_count; i++) {
     if(inst->and_values[i] == false)
@@ -85,7 +85,7 @@ bool AND_inputs_all_true(CILO * inst) // all values are true means block operati
 bool NAND_result(CILO * inst) // all values are true means allow operation, any value false means block
 {
   if(inst->nand_values_count == 0) // ignore this logic if not used, by always returning false for blocking
-    false;
+    return false;
 
   for(uint32_t i = 0; i < inst->nand_values_count; i++) {
     if(inst->nand_values[i] == false)
@@ -97,7 +97,7 @@ bool NAND_result(CILO * inst) // all values are true means allow operation, any 
 bool any_OR_input_true(CILO * inst) // any value true means block operation, all values false means allow
 {
   if(inst->or_values_count == 0) // ignore this logic if not used, by always returning false for blocking
-    false;
+    return false;
 
   for(uint32_t i = 0; i < inst->or_values_count; i++) {
     if(inst->or_values[i] == true)
@@ -109,7 +109,7 @@ bool any_OR_input_true(CILO * inst) // any value true means block operation, all
 bool NOR_result(CILO * inst) // any values are true means allow operation, all value false means block
 {
   if(inst->nor_values_count == 0) // ignore this logic if not used, by always returning false for blocking
-    false;
+    return false;
 
   for(uint32_t i = 0; i < inst->nor_values_count; i++) {
     if(inst->nor_values[i] == true)
