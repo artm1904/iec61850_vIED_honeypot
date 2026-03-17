@@ -241,6 +241,75 @@ void * PDIS_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   inst->K0FactAng = 0.0f; // K0FactAng float K0_ang = 0.0f        Residual compensation factor K 0
   inst->DirMod = DIR_FORWARD; // DirMod   dir_mode_t DirMod = DIR_FORWARD;
 
+  // Retrieve configuration values from the data model (if defined)
+  IecDataPoint dataPoints[7] = {
+      {"X1.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"LinAng.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"PhStr.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"GndStr.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"K0Fact.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"K0FactAng.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"DirMod.setVal", IEC_TYPE_INT32, {0}, false}
+  };
+  IecServer_getDataPoints(server, ln, dataPoints, 7);
+
+  if (dataPoints[0].success && dataPoints[0].value.floatVal > 0.0f) {
+    inst->X1 = dataPoints[0].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "X1.setMag.f"), &inst->X1);
+    printf("WARNING: PDIS X1 set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->X1);
+  }
+
+  if (dataPoints[1].success && dataPoints[1].value.floatVal > 0.0f) {
+    inst->LinAng = dataPoints[1].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "LinAng.setMag.f"), &inst->LinAng);
+    printf("WARNING: PDIS LinAng set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->LinAng);
+  }
+
+  if (dataPoints[2].success && dataPoints[2].value.floatVal > 0.0f) {
+    inst->PhStr = dataPoints[2].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "PhStr.setMag.f"), &inst->PhStr);
+    printf("WARNING: PDIS PhStr set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->PhStr);
+  }
+
+  if (dataPoints[3].success && dataPoints[3].value.floatVal > 0.0f) {
+    inst->GndStr = dataPoints[3].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "GndStr.setMag.f"), &inst->GndStr);
+    printf("WARNING: PDIS GndStr set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->GndStr);
+  }
+
+  if (dataPoints[4].success && dataPoints[4].value.floatVal > 0.0f) {
+    inst->K0Fact = dataPoints[4].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "K0Fact.setMag.f"), &inst->K0Fact);
+    printf("WARNING: PDIS K0Fact set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->K0Fact);
+  }
+
+  if (dataPoints[5].success) {
+    inst->K0FactAng = dataPoints[5].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "K0FactAng.setMag.f"), &inst->K0FactAng);
+    printf("WARNING: PDIS K0FactAng set to default value: %f, please define it in the SCL\n", inst->K0FactAng);
+  }
+
+  if (dataPoints[6].success && dataPoints[6].value.int32Val >= DIR_FORWARD && dataPoints[6].value.int32Val <= DIR_NON_DIR) {
+    inst->DirMod = (dir_mode_t)dataPoints[6].value.int32Val;
+  }
+  else {
+    int DirMod = (int)inst->DirMod;
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "DirMod.setVal"), &DirMod);
+    printf("WARNING: PDIS DirMod set to default value: %d, please define it in the SCL using a value in [0..2]\n", DirMod);
+  }
+
   if (input != NULL)
   {
     InputEntry *extRef = input->extRefs;

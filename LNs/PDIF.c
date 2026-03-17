@@ -163,6 +163,39 @@ void * PDIF_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
   inst->HiSet = 0.30f;
   inst->MinOpTmms = 40.0f; // 40 milliseconds, 10ms is better
 
+  // Retrieve configuration values from the data model (if defined)
+  IecDataPoint dataPoints[3] = {
+      {"LoSet.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"HiSet.setMag.f", IEC_TYPE_FLOAT, {0.0}, false},
+      {"MinOpTmms.setVal", IEC_TYPE_INT32, {0}, false}
+  };
+  IecServer_getDataPoints(server, ln, dataPoints, 3);
+
+  if (dataPoints[0].success && dataPoints[0].value.floatVal > 0.0f) {
+    inst->LoSet = dataPoints[0].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "LoSet.setMag.f"), &inst->LoSet);
+    printf("WARNING: PDIF LoSet set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->LoSet);
+  }
+
+  if (dataPoints[1].success && dataPoints[1].value.floatVal > 0.0f) {
+    inst->HiSet = dataPoints[1].value.floatVal;
+  }
+  else {
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "HiSet.setMag.f"), &inst->HiSet);
+    printf("WARNING: PDIF HiSet set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->HiSet);
+  }
+
+  if (dataPoints[2].success && dataPoints[2].value.int32Val > 0) {
+    inst->MinOpTmms = (float)dataPoints[2].value.int32Val;
+  }
+  else {
+    int MinOpTmms = (int)inst->MinOpTmms;
+    IecServer_setDataPoint(server, (DataAttribute *)ModelNode_getChild((ModelNode *)ln, "MinOpTmms.setVal"), &MinOpTmms);
+    printf("WARNING: PDIF MinOpTmms set to default value: %f, please define it in the SCL using a value greater then 0\n", inst->MinOpTmms);
+  }
+
   if (input != NULL)
   {
     InputEntry *extRef = input->extRefs;

@@ -91,7 +91,7 @@ int init(OpenServerInstance *srv)
     /* Iterate through all key-value pairs */
     printf("\n settings for %s \n", section->section);
     for (int i = 0; i < section->entry_count; i++) {
-        printf("  %s = ", section->entries[i].key);
+        //printf("  %s = ", section->entries[i].key);
          // known keys
         if(strcmp(section->entries[i].key,"socket") == 0)
         {
