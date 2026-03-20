@@ -12,6 +12,10 @@ services:
     privileged: true
     ports:
       - "5010:5010"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
 
   client:
     build:

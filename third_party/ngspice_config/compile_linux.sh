@@ -48,14 +48,14 @@ if test "$1" = "64"; then
   echo "configuring for 64 bit"
   echo
 # You may add  --enable-adms to the following command for adding adms generated devices 
-  ../configure --with-ngshared --enable-xspice --enable-cider --with-readline=yes --enable-openmp --disable-debug CFLAGS="-m64 -O2" LDFLAGS="-m64 -s"
+  ../configure --with-ngshared --enable-xspice --enable-cider --without-readline --enable-openmp --disable-debug CFLAGS="-m64 -O2" LDFLAGS="-m64 -s"
 else
    cd release
    if [ $? -ne 0 ]; then  echo "cd release failed"; exit 1 ; fi
   echo "configuring for 32 bit"
   echo
 # You may add  --enable-adms to the following command for adding adms generated devices 
-  ../configure --with-ngshared --enable-xspice --enable-cider --with-readline=yes --enable-openmp --disable-debug CFLAGS="-m32 -O2" LDFLAGS="-m32 -s"
+  ../configure --with-ngshared --enable-xspice --enable-cider --without-readline --enable-openmp --disable-debug CFLAGS="-m32 -O2" LDFLAGS="-m32 -s"
 fi
 if [ $? -ne 0 ]; then  echo "../configure failed"; exit 1 ; fi
 
