@@ -2,3 +2,6 @@
 .vscode
 build/
 contrib/
+.agents/
+llm_honeypot/
+iec61850_open_client/

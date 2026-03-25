@@ -13,7 +13,7 @@ if(DEFINED ENV{TOOLCHAIN})
     set(CMAKE_AR           "$ENV{TOOLCHAIN}ar" CACHE FILEPATH "Archiver" FORCE)
 endif()
 
-project(iec61850-open-server C)
+project(iec61850-open-server C CXX)
 
 enable_testing()
 
@@ -105,6 +105,7 @@ set(open_server_SRCS
     LNs/TCTR.c
     LNs/RREC.c
 
+    utils/honeypot_logger_c_api.cpp
     open_server.c
 )
 
@@ -131,6 +132,7 @@ target_link_libraries(open_server
     pthread
     dl
     m
+    stdc++
 )
 
 target_link_options(open_server PRIVATE -rdynamic)
