@@ -8,6 +8,7 @@
 #include <libiec61850/goose_subscriber.h>
 #include "inputs_api.h"
 #include "lib_memory.h"
+#include "honeypot_logger_c_api.h"
 
 int strcmp_p(const char *str1, const char *str2);
 
@@ -303,6 +304,10 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
       if (cnt != (inputVal->RefCount + 1) && cnt != 0)
       {
         printf("WARNING: GOOSE RefCount(stNum) is %i, expected: %i\n", cnt, inputVal->RefCount + 1);
+        char mac_str[18] = "UNKNOWN_MAC"; // Usually libiec61850 filters it, or you'd extract from raw packet.
+        char reason[128];
+        snprintf(reason, sizeof(reason), "SqNum anomaly (replay/inject?): got %i, expected %i", cnt, inputVal->RefCount + 1);
+        Logger_LogGooseAnomaly(mac_str, inputVal->extRef->Ref, reason);
       }
       inputVal->RefCount = cnt; // always assing to latest refcnt
     }
