@@ -31,6 +31,74 @@ static int global_step = 0;
 static int global_timestep_type = TIMESTEP_TYPE_LOCAL; // TIMESTEP_TYPE_REMOTE
 static int running = 0;
 
+#include <stdatomic.h>
+#include <pthread.h>
+
+atomic_int mms_req_cnt = 0;
+atomic_int goose_req_cnt = 0;
+
+void* dos_monitor_thread(void* arg) {
+    (void)arg;
+    while(running) {
+        Thread_sleep(1000); // 1 раз в секунду
+        
+        int mms_rate = atomic_exchange(&mms_req_cnt, 0);
+        int goose_rate = atomic_exchange(&goose_req_cnt, 0);
+
+        if (mms_rate > 500) { // A33-A36
+            char reason[64];
+            snprintf(reason, sizeof(reason), "MMS DoS (Rate: %d req/s)", mms_rate);
+            Logger_LogEvent("MMS", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
+        }
+        
+        if (goose_rate > 3000) { // A31-A32
+            char reason[64];
+            snprintf(reason, sizeof(reason), "GOOSE/SV DoS Flood (Rate: %d pkts/s)", goose_rate);
+            Logger_LogEvent("GOOSE", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
+        }
+    }
+    return NULL;
+}
+
+static MmsDataAccessError
+mmsWriteHandler(DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
+{
+    atomic_fetch_add(&mms_req_cnt, 1);
+    
+    char clientIp[64] = "UNKNOWN";
+    if (connection) {
+        const char *ip = ClientConnection_getPeerAddress(connection);
+        if (ip) { strncpy(clientIp, ip, 63); clientIp[63] = '\0'; }
+    }
+    
+    char objRef[128] = "";
+    if (dataAttribute && dataAttribute->name) StringUtils_copyStringToBuffer(dataAttribute->name, objRef);
+
+    char valStr[128] = "";
+    if (value) MmsValue_printToBuffer(value, valStr, sizeof(valStr));
+
+    const char* status = (strcmp(clientIp, "192.168.1.10") == 0) ? "AUTHORIZED" : "UNAUTHORIZED_ATTACK";
+    Logger_LogMmsAction("WRITE", clientIp, 102, objRef, valStr, status);
+
+    if (parameter) IedServer_updateAttributeValue((IedServer)parameter, dataAttribute, value);
+
+    return DATA_ACCESS_ERROR_SUCCESS;
+}
+
+void attachWriteHandlersRecursively(IedServer server, ModelNode* node) {
+    if (!node) return;
+    if (node->modelType == DataObjectModelType) {
+        IedServer_handleWriteAccessForDataObject(server, (DataObject*)node, IEC61850_FC_SP, mmsWriteHandler, server);
+        IedServer_handleWriteAccessForDataObject(server, (DataObject*)node, IEC61850_FC_CF, mmsWriteHandler, server);
+        IedServer_handleWriteAccessForDataObject(server, (DataObject*)node, IEC61850_FC_DC, mmsWriteHandler, server);
+    }
+    ModelNode* child = node->firstChild;
+    while (child) {
+        attachWriteHandlersRecursively(server, child);
+        child = child->sibling;
+    }
+}
+
 void IEC61850_server_timestep_next_step() {
   global_step++;
   // printf("step: %i\n",global_step);
@@ -212,8 +280,14 @@ int main(int argc, char **argv) {
   // By default we deny writing to SP elements, unless we have explicitly
   // installed a write handler inside the LN init. example: PTOC installs this
   // for StrVal
-  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_SP,
-                                 ACCESS_POLICY_DENY);
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_SP, ACCESS_POLICY_ALLOW);
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_CF, ACCESS_POLICY_ALLOW);
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_DC, ACCESS_POLICY_ALLOW);
+
+  // HONEYPOT: Attach write handlers to intercept and log all allowed writes
+  if (openServer.Model && openServer.Model->firstChild) {
+      attachWriteHandlersRecursively(openServer.server, (ModelNode*)openServer.Model->firstChild);
+  }
 
   GooseReceiver GSEreceiver = GooseReceiver_create();
   SVReceiver SMVreceiver = SVReceiver_create();
@@ -249,6 +323,9 @@ int main(int argc, char **argv) {
   /* MMS server will be instructed to start listening to client connections. */
   IedServer_start(openServer.server, port);
   running = 1;
+
+  pthread_t dos_thread;
+  pthread_create(&dos_thread, NULL, dos_monitor_thread, NULL);
 
   if (!IedServer_isRunning(openServer.server)) {
     printf("Starting server failed! Exit.\n");

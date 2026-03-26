@@ -14,6 +14,8 @@ int strcmp_p(const char *str1, const char *str2);
 
 InputValue *create_InputValue(int index, DataAttribute *da, Input *input, InputEntry *extRef);
 
+#include <stdatomic.h>
+extern atomic_int goose_req_cnt;
 void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *parameter);
 void subscriber_callback_inputs_SMV(SVSubscriber subscriber, void *parameter, SVSubscriber_ASDU asdu);
 
@@ -291,25 +293,46 @@ LinkedList subscribeToLocalDAInputs(IedServer server, IedModel_extensions *self,
 // called for subscribed GOOSE data
 void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *parameter)
 {
+  atomic_fetch_add(&goose_req_cnt, 1);
   InputValue *inputVal = (InputValue *)parameter;
   if (inputVal != NULL && inputVal->extRef != NULL) // iterate trough list of value-indexes that need to be copied, and
   {
+    uint64_t current_time = Hal_getTimeInMs();
+    int32_t current_sqNum = (int32_t)GooseSubscriber_getSqNum(subscriber);
+    uint32_t current_stNum = GooseSubscriber_getStNum(subscriber);
+    
     if (inputVal->RefCount == -1) // RefCount unintialized
     {
-      inputVal->RefCount = (int32_t)GooseSubscriber_getSqNum(subscriber);
+      inputVal->RefCount = current_sqNum;
+      inputVal->stNum_cache = current_stNum;
+      inputVal->last_rcv_time_ms = current_time;
     }
     else
     {
-      int32_t cnt = (int32_t)GooseSubscriber_getSqNum(subscriber);
-      if (cnt != (inputVal->RefCount + 1) && cnt != 0)
+      int32_t expected_sqNum = inputVal->RefCount + 1;
+      uint64_t delta_time = current_time - inputVal->last_rcv_time_ms;
+
+      // 1. Проверка на Replay / Спуфинг SqNum (A24)
+      if (current_sqNum < expected_sqNum && current_sqNum != 0 && current_stNum == inputVal->stNum_cache)
       {
-        printf("WARNING: GOOSE RefCount(stNum) is %i, expected: %i\n", cnt, inputVal->RefCount + 1);
-        char mac_str[18] = "UNKNOWN_MAC"; // Usually libiec61850 filters it, or you'd extract from raw packet.
+        printf("WARNING: GOOSE SqNum anomaly! got %i, expected %i\n", current_sqNum, expected_sqNum);
         char reason[128];
-        snprintf(reason, sizeof(reason), "SqNum anomaly (replay/inject?): got %i, expected %i", cnt, inputVal->RefCount + 1);
-        Logger_LogGooseAnomaly(mac_str, inputVal->extRef->Ref, reason);
+        snprintf(reason, sizeof(reason), "REPLAY_ATTACK_A24: sqNum is lower than expected (%i < %i)", current_sqNum, expected_sqNum);
+        Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
       }
-      inputVal->RefCount = cnt; // always assing to latest refcnt
+      
+      // 2. Проверка на инъекцию / Flood (A23/A24)
+      // Если пакет пришел сильно раньше положенного ретрансляционного окна и stNum не изменился
+      if (delta_time < 5 && current_stNum == inputVal->stNum_cache && current_sqNum > 0)
+      {
+        char reason[128];
+        snprintf(reason, sizeof(reason), "INJECTION_A24: Unrealistic packet frequency (delta %lu ms without stNum change)", (unsigned long)delta_time);
+        Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
+      }
+
+      inputVal->RefCount = current_sqNum; // always assing to latest refcnt
+      inputVal->stNum_cache = current_stNum;
+      inputVal->last_rcv_time_ms = current_time;
     }
     MmsValue *values = GooseSubscriber_getDataSetValues(subscriber);
     if (MmsValue_getType(values) == MMS_STRUCTURE || MmsValue_getType(values) == MMS_ARRAY)

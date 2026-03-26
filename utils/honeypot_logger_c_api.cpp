@@ -37,4 +37,16 @@ extern "C" {
             target_ref ? target_ref : "", reason ? reason : "", "DENIED"
         );
     }
+
+    void Logger_LogEvent(const char* protocol, const char* action, const char* src_ip, int src_port, const char* target, const char* value, const char* status) {
+        HoneypotLogger::getInstance().logEvent(
+            protocol ? protocol : "UNKNOWN",
+            action ? action : "UNKNOWN",
+            src_ip ? src_ip : "0.0.0.0",
+            src_port,
+            target ? target : "",
+            value ? value : "",
+            status ? status : "UNKNOWN"
+        );
+    }
 }
