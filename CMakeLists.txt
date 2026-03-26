@@ -63,6 +63,18 @@ find_library(IEC61850_LIBRARY
         ${IEC61850_ROOT}/lib
 )
 
+find_library(IEC61850_STATIC_LIBRARY
+    NAMES libiec61850.a iec61850
+    PATHS
+        ${IEC61850_ROOT}/lib
+)
+
+find_library(IEC61850_HAL_LIBRARY
+    NAMES libhal.a hal
+    PATHS
+        ${IEC61850_ROOT}/lib
+)
+
 if(NOT IEC61850_LIBRARY OR NOT IEC61850_INCLUDE_DIR)
     message(FATAL_ERROR
         "libiec61850 not found. Set -DIEC61850_ROOT=/path/to/libiec61850"
@@ -128,7 +140,8 @@ target_include_directories(open_server PRIVATE
 )
 
 target_link_libraries(open_server
-    ${IEC61850_LIBRARY}
+    ${IEC61850_STATIC_LIBRARY}
+    ${IEC61850_HAL_LIBRARY}
     pthread
     dl
     m
