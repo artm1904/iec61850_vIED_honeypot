@@ -23,6 +23,8 @@ RUN cd /tmp/iec61850_open_server && cmake . \
 WORKDIR /srv
 RUN cd /tmp/iec61850_open_server && cp open_server /srv/libiec61850_server && cp -R plugin /srv/plugin
 
+RUN mkdir -p /var/log/tpot && chmod 777 /var/log/tpot
+
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
 CMD ["./libiec61850_server","eth0"]

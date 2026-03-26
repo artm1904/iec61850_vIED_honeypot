@@ -4,6 +4,7 @@
 extern "C" {
     void Logger_Init() {
         // T-Pot default path, adjust as needed in real docker env
+         printf("Logger_Init start@@@@\n@@@\n@@@@\n@@@@\n@@@@@\n@@@@\n@@@@@\n@@@@\n@@@@\n@@@@@\n@@@@\n@@@\n@@@\n@@@\n");
         HoneypotLogger::getInstance().init("/var/log/tpot/vied_events.json");
     }
 
