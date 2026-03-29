@@ -1,0 +1,19 @@
+FROM python:3.10-slim
+
+# Install necessary packages for testing (scapy, hping3, nmap, tcpdump)
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    hping3 \
+    nmap \
+    tcpdump \
+    iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --no-cache-dir scapy requests
+
+WORKDIR /tests
+COPY tests/simulate_attacks.py /tests/simulate_attacks.py
+RUN chmod +x /tests/simulate_attacks.py
+
+# Keep container alive so we can exec into it or run scripts manually
+CMD ["sleep", "infinity"]

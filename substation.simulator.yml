@@ -28,3 +28,15 @@ services:
     privileged: true
     ports:
       - "5000:5000"
+
+  attacker:
+    build:
+      context: .
+      dockerfile: Dockerfile.attacker
+    hostname: attacker
+    networks:
+      subnetwork1:
+        ipv4_address: 10.0.0.66
+    privileged: true
+    volumes:
+      - ./tests:/tests
