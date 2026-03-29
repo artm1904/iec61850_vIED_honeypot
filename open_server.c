@@ -45,19 +45,27 @@ void* dos_monitor_thread(void* arg) {
         int mms_rate = atomic_exchange(&mms_req_cnt, 0);
         int goose_rate = atomic_exchange(&goose_req_cnt, 0);
 
-        if (mms_rate > 500) { // A33-A36
+        if (mms_rate > 20) { // A33-A36
             char reason[64];
             snprintf(reason, sizeof(reason), "MMS DoS (Rate: %d req/s)", mms_rate);
             Logger_LogEvent("MMS", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
         }
         
-        if (goose_rate > 3000) { // A31-A32
+        if (goose_rate > 30) { // A31-A32
             char reason[64];
             snprintf(reason, sizeof(reason), "GOOSE/SV DoS Flood (Rate: %d pkts/s)", goose_rate);
             Logger_LogEvent("GOOSE", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
         }
     }
     return NULL;
+}
+
+static void
+connectionHandler(IedServer self, ClientConnection connection, bool connected, void* parameter)
+{
+    if (connected) {
+        atomic_fetch_add(&mms_req_cnt, 1);
+    }
 }
 
 static MmsDataAccessError
@@ -276,6 +284,9 @@ int main(int argc, char **argv) {
     IedServer_setLocalIpAddress(openServer.server, ipAddress);
   }
   printf("Using port: %d\n", port);
+
+  // Catch connections for DoS monitor
+  IedServer_setConnectionIndicationHandler(openServer.server, connectionHandler, NULL);
 
   // By default we deny writing to SP elements, unless we have explicitly
   // installed a write handler inside the LN init. example: PTOC installs this
