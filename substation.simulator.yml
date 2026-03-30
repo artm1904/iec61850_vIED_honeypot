@@ -19,7 +19,7 @@ services:
 
   client:
     build:
-      context: ../iec61850_open_client
+      context: ../iec61850_arm_honeypot
       dockerfile: Dockerfile.libiec61850_client
     hostname: client
     networks:
