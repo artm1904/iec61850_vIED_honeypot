@@ -321,12 +321,12 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
         Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
       }
       
-      // 2. Проверка на инъекцию / Flood (A23/A24)
+      // 2. Проверка на инъекцию / Flood (A23)
       // Если пакет пришел сильно раньше положенного ретрансляционного окна и stNum не изменился
       if (delta_time < 10 && current_stNum == inputVal->stNum_cache && current_sqNum > 0)
       {
         char reason[128];
-        snprintf(reason, sizeof(reason), "INJECTION_A24: Unrealistic packet frequency (delta %lu ms without stNum change)", (unsigned long)delta_time);
+        snprintf(reason, sizeof(reason), "INJECTION_A23: Unrealistic packet frequency (delta %lu ms without stNum change)", (unsigned long)delta_time);
         Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
       }
 

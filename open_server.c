@@ -37,6 +37,9 @@ static int running = 0;
 atomic_int mms_req_cnt = 0;
 atomic_int goose_req_cnt = 0;
 
+
+
+// Мониторинг DoS атак через MMS, GOOSE протоколы
 void* dos_monitor_thread(void* arg) {
     (void)arg;
     while(running) {
@@ -45,7 +48,7 @@ void* dos_monitor_thread(void* arg) {
         int mms_rate = atomic_exchange(&mms_req_cnt, 0);
         int goose_rate = atomic_exchange(&goose_req_cnt, 0);
 
-        if (mms_rate > 20) { // A33-A36
+        if (mms_rate > 20) { // A33-A34 
             char reason[64];
             snprintf(reason, sizeof(reason), "MMS DoS (Rate: %d req/s)", mms_rate);
             Logger_LogEvent("MMS", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
@@ -85,8 +88,8 @@ mmsWriteHandler(DataAttribute* dataAttribute, MmsValue* value, ClientConnection 
     char valStr[128] = "";
     if (value) MmsValue_printToBuffer(value, valStr, sizeof(valStr));
 
-    const char* status = (strcmp(clientIp, "192.168.1.10") == 0) ? "AUTHORIZED" : "UNAUTHORIZED_ATTACK";
-    Logger_LogMmsAction("WRITE", clientIp, 102, objRef, valStr, status);
+    const char* status = (strcmp(clientIp, "0.0.0.0") == 0) ? "AUTHORIZED" : "UNAUTHORIZED_ATTACK";  //All Write pretion is unauthorized, because in simulation we don't have real client ip
+    Logger_LogMmsAction("WRITE", clientIp, 102, objRef, valStr, status);  // A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
 
     if (parameter) IedServer_updateAttributeValue((IedServer)parameter, dataAttribute, value);
 
@@ -160,18 +163,18 @@ static MmsError fileAccessHandler(void *parameter,
 
   /* Don't allow client to rename files */
   if (service == MMS_FILE_ACCESS_TYPE_RENAME) {
-    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED");
+    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED"); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
     return MMS_ERROR_FILE_FILE_ACCESS_DENIED;
   }
 
   /* Don't allow client to delete files */
   if (service == MMS_FILE_ACCESS_TYPE_DELETE) {
-    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED");
+    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED"); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
     // if (strcmp(localFilename, "IEDSERVER.BIN") == 0)
     return MMS_ERROR_FILE_FILE_ACCESS_DENIED;
   }
 
-  Logger_LogFileAccess("READ/WRITE/OTHER", clientIp, 0, localFilename,
+  Logger_LogFileAccess("READ/WRITE/OTHER", clientIp, 0, localFilename, //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
                        "ALLOWED");
   /* allow all other accesses */
   return MMS_ERROR_NONE;
@@ -291,9 +294,9 @@ int main(int argc, char **argv) {
   // By default we deny writing to SP elements, unless we have explicitly
   // installed a write handler inside the LN init. example: PTOC installs this
   // for StrVal
-  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_SP, ACCESS_POLICY_ALLOW);
-  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_CF, ACCESS_POLICY_ALLOW);
-  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_DC, ACCESS_POLICY_ALLOW);
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_SP, ACCESS_POLICY_ALLOW);  // Разрешаем запись данного типа переменных 
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_CF, ACCESS_POLICY_ALLOW);  // Разрешаем запись данного типа переменных 
+  IedServer_setWriteAccessPolicy(openServer.server, IEC61850_FC_DC, ACCESS_POLICY_ALLOW);  // Разрешаем запись данного типа переменных 
 
   // HONEYPOT: Attach write handlers to intercept and log all allowed writes
   if (openServer.Model && openServer.Model->firstChild) {
