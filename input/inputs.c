@@ -391,18 +391,42 @@ void subscriber_callback_inputs_SMV(SVSubscriber subscriber, void *parameter, SV
   InputValue *inputVal = (InputValue *)parameter;
   if (inputVal != NULL && inputVal->extRef != NULL) // iterate trough list of value-indexes that need to be copied, and
   {
+    uint64_t current_time = Hal_getTimeInMs();
+
     if (inputVal->RefCount == -1) // RefCount unintialized
     {
       inputVal->RefCount = (int32_t)SVSubscriber_ASDU_getSmpCnt(asdu);
+      inputVal->last_rcv_time_ms = current_time;
     }
     else
     {
       int32_t cnt = (int32_t)SVSubscriber_ASDU_getSmpCnt(asdu);
-      if (cnt != (inputVal->RefCount + 1) && cnt != 0)
+      int32_t expected_cnt = inputVal->RefCount + 1;
+      uint64_t delta_time = current_time - inputVal->last_rcv_time_ms;
+
+      // SmpCnt wraps at 4000 (50Hz) or 4800 (60Hz). 
+      // If it drops when it shouldn't (not a wrap to 0), it is a replay (A2).
+      if (cnt < inputVal->RefCount && cnt != 0)
       {
-        printf("WARNING: SMV RefCount(SmpCnt) is %i, expected: %i\n", cnt, inputVal->RefCount + 1);
+        char reason[128];
+        snprintf(reason, sizeof(reason), "REPLAY_ATTACK_A2: SmpCnt is lower than expected (%i < %i)", cnt, expected_cnt);
+        Logger_LogEvent("SV", "INJECT", "UNKNOWN_MAC", 0, inputVal->extRef->Ref, reason, "DENIED");
       }
+      
+      // If packet frequency is unnaturally fast for a 4kHz stream (say delta < 0 implies time jump, but we'll monitor extreme bursts)
+      // Actually SV sends 4000 packets per second, which means delta is 0.25ms!
+      // So Hal_getTimeInMs() will often yield delta_time == 0.
+      // We can detect injection if delta_time is VERY small AND the SmpCnt suddenly jumps wildly without wrap.
+      // For now, simple injection check: SmpCnt jump > 50 without wrap.
+      if (cnt > expected_cnt + 50)
+      {
+        char reason[128];
+        snprintf(reason, sizeof(reason), "INJECTION_A1: SmpCnt jumped unexpectedly (%i -> %i)", inputVal->RefCount, cnt);
+        Logger_LogEvent("SV", "INJECT", "UNKNOWN_MAC", 0, inputVal->extRef->Ref, reason, "DENIED");
+      }
+
       inputVal->RefCount = cnt; // always assing to latest refcnt
+      inputVal->last_rcv_time_ms = current_time;
     }
 
     int size = SVSubscriber_ASDU_getDataSize(asdu);
