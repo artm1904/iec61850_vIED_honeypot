@@ -10,10 +10,12 @@
 #include "iec61850_model_extensions.h"
 #include "inputs_api.h"
 #include "timestep_config.h"
+#include <string.h>
 
 #include <libiec61850/hal_thread.h> /* for Thread_sleep() */
 #include <libiec61850/mms_server.h>
 #include <libiec61850/sv_publisher.h>
+#include <libiec61850/iec61850_server.h>
 
 #include <signal.h>
 #include <stdio.h>
@@ -24,6 +26,10 @@
 #include <dirent.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <libiec61850/hal_socket.h>
 
@@ -60,6 +66,47 @@ void* dos_monitor_thread(void* arg) {
             Logger_LogEvent("GOOSE", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
         }
     }
+    return NULL;
+}
+
+void* ntp_monitor_thread(void* arg) {
+    (void)arg;
+    int sockfd;
+    struct sockaddr_in servaddr, cliaddr;
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("NTP socket creation failed");
+        return NULL;
+    }
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_port = htons(123); // NTP
+
+    struct timeval tv;
+    tv.tv_sec = 1; tv.tv_usec = 0;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
+    if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("NTP bind failed");
+        close(sockfd);
+        return NULL;
+    }
+
+    char buffer[1024];
+    while(running) {
+        socklen_t len = sizeof(cliaddr);
+        int n = recvfrom(sockfd, (char *)buffer, sizeof(buffer), 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            char clientIp[64];
+            inet_ntop(AF_INET, &(cliaddr.sin_addr), clientIp, INET_ADDRSTRLEN);
+            Logger_LogEvent("NTP/PTP", "TIME_SPOOF_ATTACK_A3_A4", clientIp, ntohs(cliaddr.sin_port), "SYSTEM_TIME", "NTP_PAYLOAD", "DENIED");
+        }
+    }
+    close(sockfd);
     return NULL;
 }
 
@@ -151,6 +198,10 @@ static MmsError fileAccessHandler(void *parameter,
     actionName = "RENAME";
   else if (service == MMS_FILE_ACCESS_TYPE_DELETE)
     actionName = "DELETE";
+  else if (service == MMS_FILE_ACCESS_TYPE_OBTAIN)
+    actionName = "OBTAIN";
+  else if (service == MMS_FILE_ACCESS_TYPE_OPEN)
+    actionName = "OPEN";
 
   char clientIp[64] = "0.0.0.0";
   if (connection) {
@@ -161,21 +212,39 @@ static MmsError fileAccessHandler(void *parameter,
     }
   }
 
+  const char *status = "DENIED";
+  const char *status_allowed = "ALLOWED";
+  
+  // A13-A14, A17-A18 Detectors
+  const char* ext = strrchr(localFilename, '.');
+  if (ext != NULL) {
+      if (strcasecmp(ext, ".bin") == 0 || strcasecmp(ext, ".elf") == 0 || 
+          strcasecmp(ext, ".tar") == 0 || strcasecmp(ext, ".sh") == 0 || 
+          strcasecmp(ext, ".so") == 0) {
+          status = "FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18";
+          status_allowed = "FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18";
+      }
+      else if (strcasecmp(ext, ".py") == 0 || strcasecmp(ext, ".js") == 0) {
+          status = "APP_REPLACEMENT_ATTEMPT_A13_A14";
+          status_allowed = "APP_REPLACEMENT_ATTEMPT_A13_A14";
+      }
+  }
+
   /* Don't allow client to rename files */
   if (service == MMS_FILE_ACCESS_TYPE_RENAME) {
-    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED"); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
+    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, status); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
     return MMS_ERROR_FILE_FILE_ACCESS_DENIED;
   }
 
   /* Don't allow client to delete files */
   if (service == MMS_FILE_ACCESS_TYPE_DELETE) {
-    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, "DENIED"); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
+    Logger_LogFileAccess(actionName, clientIp, 0, localFilename, status); //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
     // if (strcmp(localFilename, "IEDSERVER.BIN") == 0)
     return MMS_ERROR_FILE_FILE_ACCESS_DENIED;
   }
 
   Logger_LogFileAccess("READ/WRITE/OTHER", clientIp, 0, localFilename, //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
-                       "ALLOWED");
+                       status_allowed);
   /* allow all other accesses */
   return MMS_ERROR_NONE;
 }
@@ -340,6 +409,9 @@ int main(int argc, char **argv) {
 
   pthread_t dos_thread;
   pthread_create(&dos_thread, NULL, dos_monitor_thread, NULL);
+
+  pthread_t ntp_thread;
+  pthread_create(&ntp_thread, NULL, ntp_monitor_thread, NULL);
 
   if (!IedServer_isRunning(openServer.server)) {
     printf("Starting server failed! Exit.\n");
