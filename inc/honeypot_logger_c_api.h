@@ -20,6 +20,9 @@ void Logger_LogGooseAnomaly(const char* action, const char* src_mod_mac, const c
 /* Generic logger function for DoS and related attacks */
 void Logger_LogEvent(const char* protocol, const char* action, const char* src_ip, int src_port, const char* target, const char* value, const char* status);
 
+/* Log NTP/PTP events converting raw payload to Hex Dump */
+void Logger_LogNtpEvent(const char* action, const char* src_ip, int src_port, const char* raw_payload, int payload_len);
+
 #ifdef __cplusplus
 }
 #endif

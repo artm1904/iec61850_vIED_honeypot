@@ -35,6 +35,7 @@ public:
         nlohmann::json j;
         j["timestamp"] = getCurrentISO8601Time();
         j["src_ip"] = src_ip;
+        j["src_mac"] = getMacFromIp(src_ip);
         j["src_port"] = src_port;
         j["protocol"] = protocol;
         j["action"] = action;
@@ -50,6 +51,40 @@ public:
             // Fallback if not initialized properly
             std::cout << "LOG: " << j.dump() << std::endl;
         }
+    }
+
+    std::string getMacFromIp(const std::string& ip) {
+        if (ip.empty() || ip == "0.0.0.0" || ip == "127.0.0.1") return "UNKNOWN_MAC";
+        std::ifstream arp_file("/proc/net/arp");
+        if (!arp_file.is_open()) return "UNKNOWN_MAC";
+        
+        std::string line;
+        // Skip header
+        std::getline(arp_file, line);
+        while (std::getline(arp_file, line)) {
+            // Format: IP address       HW type     Flags       HW address            Mask     Device
+            size_t pos = line.find(ip);
+            if (pos == 0 && line.length() > ip.length() && line[ip.length()] == ' ') {
+                // Find HW address
+                size_t mac_pos = line.find(":", ip.length());
+                if (mac_pos != std::string::npos && mac_pos >= 2) {
+                    mac_pos -= 2; // Move back to start of MAC
+                    return line.substr(mac_pos, 17);
+                }
+            }
+        }
+        return "UNKNOWN_MAC";
+    }
+
+    std::string hexDump(const std::string& data) {
+        if (data.empty()) return "";
+        std::string result;
+        char buf[8];
+        for (unsigned char c : data) {
+            snprintf(buf, sizeof(buf), "%02X ", c);
+            result += buf;
+        }
+        return result;
     }
 
 private:

@@ -103,7 +103,7 @@ void* ntp_monitor_thread(void* arg) {
         if (n > 0) {
             char clientIp[64];
             inet_ntop(AF_INET, &(cliaddr.sin_addr), clientIp, INET_ADDRSTRLEN);
-            Logger_LogEvent("NTP/PTP", "SPOOF", clientIp, ntohs(cliaddr.sin_port), "SYSTEM_TIME", "NTP_PAYLOAD", "DENIED");
+            Logger_LogNtpEvent("SPOOF", clientIp, ntohs(cliaddr.sin_port), buffer, n);
         }
     }
     close(sockfd);
