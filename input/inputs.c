@@ -290,6 +290,8 @@ LinkedList subscribeToLocalDAInputs(IedServer server, IedModel_extensions *self,
   return DAlist;
 }
 
+extern char last_goose_dos_mac[64];
+
 // called for subscribed GOOSE data
 void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *parameter)
 {
@@ -312,13 +314,21 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
       int32_t expected_sqNum = inputVal->RefCount + 1;
       uint64_t delta_time = current_time - inputVal->last_rcv_time_ms;
 
+      char mac_str[32] = "UNKNOWN_MAC";
+      uint8_t macBuf[6] = {0};
+      GooseSubscriber_getSrcMac(subscriber, macBuf);
+      snprintf(mac_str, sizeof(mac_str), "%02x:%02x:%02x:%02x:%02x:%02x", 
+               macBuf[0], macBuf[1], macBuf[2], macBuf[3], macBuf[4], macBuf[5]);
+      strncpy(last_goose_dos_mac, mac_str, 63);
+      last_goose_dos_mac[63] = '\0';
+
       // 1. Проверка на Replay / Спуфинг SqNum (A24)
       if (current_sqNum < expected_sqNum && current_sqNum != 0 && current_stNum == inputVal->stNum_cache)
       {
         printf("WARNING: GOOSE SqNum anomaly! got %i, expected %i\n", current_sqNum, expected_sqNum);
         char reason[128];
         snprintf(reason, sizeof(reason), "REPLAY_ATTACK_A24: sqNum is lower than expected (%i < %i)", current_sqNum, expected_sqNum);
-        Logger_LogGooseAnomaly("REPLAY", "UNKNOWN_MAC", inputVal->extRef->Ref, reason);
+        Logger_LogGooseAnomaly("REPLAY", mac_str, inputVal->extRef->Ref, reason);
       }
       
       // 2. Проверка на инъекцию / Flood (A23)
@@ -327,7 +337,7 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
       {
         char reason[128];
         snprintf(reason, sizeof(reason), "INJECTION_A23: Unrealistic packet frequency (delta %lu ms without stNum change)", (unsigned long)delta_time);
-        Logger_LogGooseAnomaly("INJECT", "UNKNOWN_MAC", inputVal->extRef->Ref, reason);
+        Logger_LogGooseAnomaly("INJECT", mac_str, inputVal->extRef->Ref, reason);
       }
 
       inputVal->RefCount = current_sqNum; // always assing to latest refcnt

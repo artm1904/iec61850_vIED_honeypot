@@ -43,7 +43,8 @@ static int running = 0;
 atomic_int mms_req_cnt = 0;
 atomic_int goose_req_cnt = 0;
 
-
+char last_mms_dos_ip[64] = "UNKNOWN_IP";
+char last_goose_dos_mac[64] = "UNKNOWN_MAC";
 
 // Мониторинг DoS атак через MMS, GOOSE протоколы
 void* dos_monitor_thread(void* arg) {
@@ -57,13 +58,13 @@ void* dos_monitor_thread(void* arg) {
         if (mms_rate > 20) { // A33-A34 
             char reason[64];
             snprintf(reason, sizeof(reason), "MMS DoS (Rate: %d req/s)", mms_rate);
-            Logger_LogEvent("MMS", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
+            Logger_LogEvent("MMS", "DoS_ATTACK", last_mms_dos_ip, 0, "SYSTEM", "", reason);
         }
         
         if (goose_rate > 30) { // A31-A32
             char reason[64];
             snprintf(reason, sizeof(reason), "GOOSE/SV DoS Flood (Rate: %d pkts/s)", goose_rate);
-            Logger_LogEvent("GOOSE", "DoS_ATTACK", "MULTIPLE", 0, "SYSTEM", "", reason);
+            Logger_LogEvent("GOOSE", "DoS_ATTACK", last_goose_dos_mac, 0, "SYSTEM", "", reason);
         }
     }
     return NULL;
@@ -115,6 +116,10 @@ connectionHandler(IedServer self, ClientConnection connection, bool connected, v
 {
     if (connected) {
         atomic_fetch_add(&mms_req_cnt, 1);
+        if (connection) {
+            const char *ip = ClientConnection_getPeerAddress(connection);
+            if (ip) { strncpy(last_mms_dos_ip, ip, 63); last_mms_dos_ip[63] = '\0'; }
+        }
     }
 }
 

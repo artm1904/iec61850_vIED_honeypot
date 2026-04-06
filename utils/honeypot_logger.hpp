@@ -53,8 +53,20 @@ public:
         }
     }
 
-    std::string getMacFromIp(const std::string& ip) {
-        if (ip.empty() || ip == "0.0.0.0" || ip == "127.0.0.1") return "UNKNOWN_MAC";
+    std::string getMacFromIp(const std::string& ip_with_port) {
+        if (ip_with_port.empty() || ip_with_port == "0.0.0.0" || ip_with_port == "127.0.0.1" || ip_with_port == "UNKNOWN_MAC" || ip_with_port == "MULTIPLE") return "UNKNOWN_MAC";
+        
+        // If it's already a MAC address (e.g. from GOOSE)
+        if (ip_with_port.length() == 17 && ip_with_port[2] == ':') {
+            return ip_with_port;
+        }
+
+        std::string ip = ip_with_port;
+        size_t colon_pos = ip.find(":");
+        if (colon_pos != std::string::npos) {
+            ip = ip.substr(0, colon_pos);
+        }
+
         std::ifstream arp_file("/proc/net/arp");
         if (!arp_file.is_open()) return "UNKNOWN_MAC";
         
