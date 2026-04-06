@@ -40,9 +40,9 @@ extern "C" {
 
     // A23 - Нарушитель, решил осуществить подмену информации, передаваемую по GOOSE, используя ПО, доступное в открытом доступе и/или самостоятельно разработанное ПО
     // A24 - Нарушитель подключится к шине станции и отправит некорректные данные по GOOSE, используя ПО, доступное в открытом доступе и/или самостоятельно разработанное ПО
-    void Logger_LogGooseAnomaly(const char* src_mod_mac, const char* target_ref, const char* reason) {
+    void Logger_LogGooseAnomaly(const char* action,const char* src_mod_mac, const char* target_ref, const char* reason) {
         HoneypotLogger::getInstance().logEvent(
-            "GOOSE", "INJECT", src_mod_mac ? src_mod_mac : "00:00:00:00:00:00", 0, 
+            "GOOSE", action ? action : "UNKNOWN", src_mod_mac ? src_mod_mac : "00:00:00:00:00:00", 0, 
             target_ref ? target_ref : "", reason ? reason : "", "DENIED"
         );
     }

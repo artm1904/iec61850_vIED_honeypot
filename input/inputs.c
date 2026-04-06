@@ -318,7 +318,7 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
         printf("WARNING: GOOSE SqNum anomaly! got %i, expected %i\n", current_sqNum, expected_sqNum);
         char reason[128];
         snprintf(reason, sizeof(reason), "REPLAY_ATTACK_A24: sqNum is lower than expected (%i < %i)", current_sqNum, expected_sqNum);
-        Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
+        Logger_LogGooseAnomaly("REPLAY", "UNKNOWN_MAC", inputVal->extRef->Ref, reason);
       }
       
       // 2. Проверка на инъекцию / Flood (A23)
@@ -327,7 +327,7 @@ void subscriber_callback_inputs_GOOSE(GooseSubscriber subscriber, void *paramete
       {
         char reason[128];
         snprintf(reason, sizeof(reason), "INJECTION_A23: Unrealistic packet frequency (delta %lu ms without stNum change)", (unsigned long)delta_time);
-        Logger_LogGooseAnomaly("UNKNOWN_MAC", inputVal->extRef->Ref, reason);
+        Logger_LogGooseAnomaly("INJECT", "UNKNOWN_MAC", inputVal->extRef->Ref, reason);
       }
 
       inputVal->RefCount = current_sqNum; // always assing to latest refcnt
@@ -410,7 +410,7 @@ void subscriber_callback_inputs_SMV(SVSubscriber subscriber, void *parameter, SV
       {
         char reason[128];
         snprintf(reason, sizeof(reason), "REPLAY_ATTACK_A2: SmpCnt is lower than expected (%i < %i)", cnt, expected_cnt);
-        Logger_LogEvent("SV", "INJECT", "UNKNOWN_MAC", 0, inputVal->extRef->Ref, reason, "DENIED");
+        Logger_LogEvent("SV", "REPLAY", "UNKNOWN_MAC", 0, inputVal->extRef->Ref, reason, "DENIED");
       }
       
       // If packet frequency is unnaturally fast for a 4kHz stream (say delta < 0 implies time jump, but we'll monitor extreme bursts)
