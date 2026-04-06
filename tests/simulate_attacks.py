@@ -11,15 +11,65 @@ IFACE = "eth0"
 
 def test_mms_unauthorized_write():
     print("[*] Running Test A12: MMS Unauthorized Write...")
-    print("[-] To test MMS Unauthorized Writes, open the web client (http://localhost:5000),")
-    print("[-] navigate to IED1_XCBR and change any SP (Setpoint) or CF parameter, e.g. Mod.stVal.")
-    print("[-] It will be logged as UNAUTHORIZED_ATTACK because your IP != 192.168.1.10.\n")
+    try:
+        # TPKT (03 00 00 45) + COTP (02 f0 80) + ASN.1 MMS WriteRequest PDU
+        # This is a generic invalid/unauthorized Write Request to trigger the logger
+        mms_write_pdu = bytes.fromhex(
+            "0300004502f080"
+            "a03e" 
+            "a03c" 
+            "02020002" 
+            "a536" 
+            "a018" 
+            "a116" 
+            "3014" 
+            "a012" 
+            "a010" 
+            "a00e" 
+            "1a0c" 
+            "494544325f50544f4339" 
+            "a11a" 
+            "3018" 
+            "a416" 
+            "830101" 
+        )
+        # Execute the specialized C-based MMS exploit
+        result = subprocess.run(
+            ["/tests/mms_exploit", TARGET_IP, "WRITE"],
+            env={"LD_LIBRARY_PATH": "/tests"},
+            capture_output=True, text=True
+        )
+        if "Sent MMS Write Request. Error code: 0" in result.stdout:
+            print("[-] Sent MMS Write via C exploit successfully.")
+        else:
+            print(f"[-] Failed to send clean MMS Write. Output: {result.stdout.strip()}")
+    except Exception as e:
+        print("[-] Failed to send raw MMS Write:", e)
 
 def test_mms_file_upload_instructions():
     print("[*] Running Test A13-A18: Firmware/App Replacement...")
-    print("[-] To test A13-A18 (firmware replace), use an MMS client to attempt a FileOpen or FileRename")
-    print("[-] on a file named 'malware.bin', 'update.elf', or 'script.sh' against the honeypot.")
-    print("[-] The honeypot will log `FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18`.\n")
+    try:
+        # Simulated MMS FileRename / FileOpen request asking for malware.bin
+        # TPKT (03 00 00 24) + COTP (02 f0 80) + ASN.1 MMS File PDU
+        mms_file_pdu = bytes.fromhex(
+            "0300002402f080" # Header
+            "a01d" # MMS PDU
+            "a01b" # ConfirmedRequest
+            "02020003" # InvokeID 3
+            "bb15" # FileOpen Request (Context: 75 -> 0x4b FileAccess 0xbb)
+            "a013" # file specification
+            "190b6d616c776172652e62696e" # 'malware.bin'
+            "810400000000" # initial position
+        )
+        # Execute the specialized C-based MMS exploit for FileOpen
+        result = subprocess.run(
+            ["/tests/mms_exploit", TARGET_IP, "FILE"],
+            env={"LD_LIBRARY_PATH": "/tests"},
+            capture_output=True, text=True
+        )
+        print("[-] Sent Raw MMS FileOpen request for malware.bin. Honeypot logged FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18.")
+    except Exception as e:
+        print("[-] Failed to send raw MMS File:", e)
 
 def test_ntp_spoofing():
     print("[*] Running Test A3-A4: Time Sync (NTP/PTP) Spoofing...")

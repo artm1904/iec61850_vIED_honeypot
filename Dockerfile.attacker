@@ -1,5 +1,6 @@
 FROM python:3.10-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
 # Install necessary packages for testing (scapy, hping3, nmap, tcpdump)
 RUN apt-get update && apt-get install -y \
     python3-pip \
@@ -7,13 +8,35 @@ RUN apt-get update && apt-get install -y \
     nmap \
     tcpdump \
     iproute2 \
+    git \
+    build-essential \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=
+
+# Build libiec61850
+RUN git clone -b v1.6 https://github.com/mz-automation/libiec61850.git /tmp/libiec61850 && \
+    cd /tmp/libiec61850 && cmake . && make && make install
 
 RUN pip3 install --no-cache-dir scapy requests
 
 WORKDIR /tests
-COPY tests/simulate_attacks.py /tests/simulate_attacks.py
-RUN chmod +x /tests/simulate_attacks.py
+COPY tests/ /tests/
+
+# Compile the specific C exploit utilizing the installed library
+RUN gcc /tests/mms_exploit.c \
+    -I /tmp/libiec61850/src/common/inc \
+    -I /tmp/libiec61850/src/mms/inc \
+    -I /tmp/libiec61850/src/mms/inc_private \
+    -I /tmp/libiec61850/src/iec61850/inc \
+    -I /tmp/libiec61850/hal/inc \
+    -I /tmp/libiec61850/src/logging \
+    -L /usr/local/lib -liec61850 -lpthread \
+    -o /tests/mms_exploit
+
+ENV LD_LIBRARY_PATH=/usr/local/lib:/tests
+
+RUN chmod +x /tests/simulate_attacks.py /tests/mms_exploit
 
 # Keep container alive so we can exec into it or run scripts manually
 CMD ["sleep", "infinity"]
