@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y \
               build-essential \
               cmake \
               python3 python3-dev \
+              iproute2 \  
+              iptables \
+              tcpdump \
          && rm -rf /var/lib/apt/lists/*
 ENV DEBIAN_FRONTEND=
 
@@ -26,6 +29,19 @@ RUN cd /tmp/iec61850_open_server && cp open_server /srv/libiec61850_server && cp
 RUN mkdir -p /var/log/tpot && chmod 777 /var/log/tpot
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+
+
+# --- ДОБАВЛЯЕМ BEELZEBUB ---
+COPY --from=custom-beelzebub /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=custom-beelzebub /opt/beelzebub /opt/beelzebub
+
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 22 80 2222 8080
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 CMD ["./libiec61850_server","eth0"]
 
