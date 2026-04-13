@@ -174,6 +174,14 @@ static void *SMV_Thread(void * parameter)
             SVPublisher_ASDU_setSmpCnt(inst->asdu, (uint16_t)sampleCount);
 
             SVPublisher_publish(inst->svPublisher);
+            
+            if (sampleCount == 0) {
+                printf("SMV Thread: Published 4000 samples. svcbEnabled=%d\n", inst->svcbEnabled);
+            }
+        } else {
+            if (sampleCount == 0) {
+                printf("SMV Thread: Skipping publish. svcbEnabled=%d\n", inst->svcbEnabled);
+            }
         }
 
         sampleCount = ((sampleCount + 1) % 4000);

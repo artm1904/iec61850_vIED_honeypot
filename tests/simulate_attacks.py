@@ -4,10 +4,11 @@ import socket
 import threading
 from scapy.all import *
 
-TARGET_IP = "10.0.0.2" # IP of IED1_XCBR
+#TARGET_IP = "10.0.0.2" # IP of IED1_XCBR
+TARGET_IP = "192.168.1.202" # IP of IED1_XCBR
 TARGET_MAC = "01:0c:cd:01:00:02" # GOOSE Multicast
 TARGET_SV_MAC = "01:0c:cd:01:00:03" # SV Multicast
-IFACE = "eth0"
+IFACE = "wlan0"
 
 def test_mms_unauthorized_write():
     print("[*] Running Test A12: MMS Unauthorized Write...")
