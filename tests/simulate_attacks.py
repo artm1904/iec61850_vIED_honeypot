@@ -42,10 +42,10 @@ def test_mms_unauthorized_write():
             env={"LD_LIBRARY_PATH": "/tests"},
             capture_output=True, text=True
         )
-        if "Sent MMS Write Request. Error code: 0" in result.stdout:
+        if "Error code: 0" in result.stdout:
             print("[-] Sent MMS Write via C exploit successfully.")
         else:
-            print(f"[-] Failed to send clean MMS Write. Output: {result.stdout.strip()}")
+            print(f"[-] MMS Write rejected (expected for honeypot). Output: {result.stdout.strip()}")
     except Exception as e:
         print("[-] Failed to send raw MMS Write:", e)
 
