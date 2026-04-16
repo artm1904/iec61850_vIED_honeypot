@@ -141,29 +141,32 @@ void PTOC_callback_SMV(void *ptoc_inst)
   }
 }
 
+#include "honeypot_logger_c_api.h"
+
 static MmsDataAccessError PTOC_writeAccessHandler (DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
 {
-    PTOC *inst = parameter;
-    if(inst == NULL)
-      return DATA_ACCESS_ERROR_OBJECT_ACCESS_DENIED;
-    
-    if (dataAttribute == inst->DA_StrVal) {
+    float newValue = MmsValue_toFloat(value);
 
-        float newValue = MmsValue_toFloat(value);
-
-        printf("New value for StrVal.setMag.f = %f\n", newValue);
-
-        /* Check if value is inside of valid range */
-        if ((newValue >= 0.f) && (newValue <= 1000.1f)){
-          inst->StrVal = newValue;
-          return DATA_ACCESS_ERROR_SUCCESS;
+    // Accept bounds up to 100kA to capture the blinding payload
+    if ((newValue >= 0.f) && (newValue <= 100000.0f)) {
+        
+        char clientIp[64] = "0.0.0.0";
+        if (connection) {
+            const char *ip = ClientConnection_getPeerAddress(connection);
+            if (ip) {
+                strncpy(clientIp, ip, 63);
+                clientIp[63] = '\0';
+            }
         }
-        else
-          return DATA_ACCESS_ERROR_OBJECT_VALUE_INVALID;
+        char valStr[64];
+        snprintf(valStr, sizeof(valStr), "NEW_THRESHOLD: %f A", newValue);
+        
+        Logger_LogMmsAction("MODIFY_PROTECTION_THRESHOLD", clientIp, 0, "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", valStr, "BLINDING_ATTACK_ON_PROTECTION_RELAY");
 
+        return DATA_ACCESS_ERROR_SUCCESS;
     }
-
-    return DATA_ACCESS_ERROR_OBJECT_ACCESS_DENIED;
+    else
+        return DATA_ACCESS_ERROR_OBJECT_VALUE_INVALID;
 }
 
 void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList allInputValues)

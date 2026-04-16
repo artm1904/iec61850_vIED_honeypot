@@ -226,12 +226,12 @@ static MmsError fileAccessHandler(void *parameter,
       if (strcasecmp(ext, ".bin") == 0 || strcasecmp(ext, ".elf") == 0 || 
           strcasecmp(ext, ".tar") == 0 || strcasecmp(ext, ".sh") == 0 || 
           strcasecmp(ext, ".so") == 0) {
-          status = "FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18";
-          status_allowed = "FIRMWARE_REPLACEMENT_ATTEMPT_A17_A18";
+          status = "FIRMWARE_REPLACEMENT_ATTEMPT";
+          status_allowed = "FIRMWARE_REPLACEMENT_ATTEMPT";
       }
       else if (strcasecmp(ext, ".py") == 0 || strcasecmp(ext, ".js") == 0) {
-          status = "APP_REPLACEMENT_ATTEMPT_A13_A14";
-          status_allowed = "APP_REPLACEMENT_ATTEMPT_A13_A14";
+          status = "APP_REPLACEMENT_ATTEMPT";
+          status_allowed = "APP_REPLACEMENT_ATTEMPT";
       }
   }
 
@@ -248,7 +248,7 @@ static MmsError fileAccessHandler(void *parameter,
     return MMS_ERROR_FILE_FILE_ACCESS_DENIED;
   }
 
-  Logger_LogFileAccess("READ/WRITE/OTHER", clientIp, 0, localFilename, //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
+  Logger_LogFileAccess("FILE_ACCESS", clientIp, 0, localFilename, //A9-A10 - Нарушитель решил осуществить подмену информации, передаваемой по MMS
                        status_allowed);
   /* allow all other accesses */
   return MMS_ERROR_NONE;
