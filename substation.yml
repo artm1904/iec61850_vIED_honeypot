@@ -1,5 +1,6 @@
 include:
   - substation.simulator.yml
+  #- ../iec61850_open_gateway/gateway.yml
 
 services:
   ied1_xcbr:

