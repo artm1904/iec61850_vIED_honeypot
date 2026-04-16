@@ -143,6 +143,9 @@ void PTOC_callback_SMV(void *ptoc_inst)
 
 #include "honeypot_logger_c_api.h"
 
+static PTOC* g_ptoc_instances[16] = {0};
+static int g_ptoc_count = 0;
+
 static MmsDataAccessError PTOC_writeAccessHandler (DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
 {
     float newValue = MmsValue_toFloat(value);
@@ -150,6 +153,13 @@ static MmsDataAccessError PTOC_writeAccessHandler (DataAttribute* dataAttribute,
     // Accept bounds up to 100kA to capture the blinding payload
     if ((newValue >= 0.f) && (newValue <= 100000.0f)) {
         
+        // Loop over true PTOC instances to avoid libiec61850 `void* parameter` corruption!
+        // open_server.c overrides the `parameter` with `IedServer`, so dereferencing it causes SIGSEGV.
+        // We update all PTOCs since dynamic node casting makes dataAttribute matching unpredictable.
+        for (int i = 0; i < g_ptoc_count; i++) {
+            g_ptoc_instances[i]->StrVal = newValue;
+        }
+
         char clientIp[64] = "0.0.0.0";
         if (connection) {
             const char *ip = ClientConnection_getPeerAddress(connection);
@@ -284,6 +294,10 @@ void * PTOC_init(IedServer server, LogicalNode *ln, Input *input, LinkedList all
       }
       extRef = extRef->sibling;
     }
+  }
+
+  if (g_ptoc_count < 16) {
+      g_ptoc_instances[g_ptoc_count++] = inst;
   }
 
   return inst;
