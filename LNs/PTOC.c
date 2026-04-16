@@ -150,12 +150,6 @@ static MmsDataAccessError PTOC_writeAccessHandler (DataAttribute* dataAttribute,
     // Accept bounds up to 100kA to capture the blinding payload
     if ((newValue >= 0.f) && (newValue <= 100000.0f)) {
         
-        // Update the actual PTOC threshold so the relay is truly "blinded"
-        PTOC *inst = (PTOC *)parameter;
-        if (inst) {
-            inst->StrVal = newValue;
-        }
-
         char clientIp[64] = "0.0.0.0";
         if (connection) {
             const char *ip = ClientConnection_getPeerAddress(connection);
