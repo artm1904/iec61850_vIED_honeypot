@@ -201,6 +201,62 @@ def clear_plot():
   return { 'plot' : 'clear' }
 
 
+@app.route('/plot_data', methods = ['GET'])
+def plot_data():
+  """Return current simulation arrays as JSON for real-time plotting."""
+  global sim
+  if sim == None:
+    return jsonify({ 'error' : 'no simulation' })
+  # optional: limit to last N samples
+  try:
+    tail = int(request.args.get("tail", 500))
+  except:
+    tail = 500
+  currents = {}
+  for key in sim.arrA:
+    arr = sim.arrA[key]
+    currents[key] = arr[-tail:].tolist() if len(arr) > tail else arr.tolist()
+  voltages = {}
+  for key in sim.arrV:
+    arr = sim.arrV[key]
+    voltages[key] = arr[-tail:].tolist() if len(arr) > tail else arr.tolist()
+  return jsonify({
+    'currents': currents,
+    'voltages': voltages,
+    'steps': steps_counter,
+    'keys_A': list(sim.arrA.keys()),
+    'keys_V': list(sim.arrV.keys()),
+  })
+
+
+@app.route('/simulation_node_api', methods = ['GET', 'POST'])
+def simulation_node_api():
+  """JSON API for reading/writing simulation node values."""
+  global sim, thread
+  if sim == None:
+    return jsonify({ 'error' : 'no simulation' })
+
+  if request.method == 'POST':
+    data = request.get_json(silent=True) or {}
+    node = data.get('node', '')
+    value = data.get('value', '')
+    if not node or value == '':
+      return jsonify({'error': 'node and value required'}), 400
+    command = "alter " + str(node) + "=" + str(value)
+    if thread is None:
+      result = sim.ngspice_shared.exec_command(command)
+    else:
+      sim.que_commands(command)
+    return jsonify({'status': 'ok', 'command': command})
+  else:
+    node = request.args.get("node", "")
+    if not node:
+      return jsonify({'error': 'node parameter required'}), 400
+    val = sim.simulation_node(node)
+    val = val.replace(node + " = ", "")
+    return jsonify({'node': node, 'value': val.strip()})
+
+
 @app.route('/quit', methods = ['GET'])
 def quit():
   func = request.environ.get('werkzeug.server.shutdown')
