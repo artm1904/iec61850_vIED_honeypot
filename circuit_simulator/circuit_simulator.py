@@ -217,7 +217,7 @@ def _checkoptions(type, Voltagelevel):
   option = ""
   if type == "IFL":
     if "Voltage" in Voltagelevel:
-      volt = int(float(Voltagelevel["Voltage"]['$'])*math.sqrt(2))
+      volt = int(float(Voltagelevel["Voltage"]['$'])*math.sqrt(2)/math.sqrt(3))
       option = "vss=" + str(volt) + Voltagelevel["Voltage"]['@multiplier']
       #print("++++ IFL:" + option)
   return option

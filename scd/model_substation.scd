@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4" xmlns:esld="https://transpower.co.nz/SCL/SSD/SLD/v0">
 	<Header id="project2"/>
-	<Substation xmlns="http://www.iec.ch/61850/2003/SCL" name="SS1" desc="2 Incoming 50kV Feeds, 2 Busbars, 2 Power Transformers" esld:w="70" xmlns:esld="https://transpower.co.nz/SCL/SSD/SLD/v0" esld:h="50">
+	<Substation xmlns="http://www.iec.ch/61850/2003/SCL" name="SS1" desc="2 Incoming 110kV Feeds, 2 Busbars, 2 Power Transformers" esld:w="70" xmlns:esld="https://transpower.co.nz/SCL/SSD/SLD/v0" esld:h="50">
 		<PowerTransformer name="PT1" type="PTR" esld:x="32" esld:y="25" esld:lx="33.5" esld:ly="25">
 			<TransformerWinding name="W1" type="PTW">
-				<Terminal esld:uuid="ea1ac572-6f71-49fe-aa19-d18a327331cf" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT1/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L3"/>
+				<Terminal esld:uuid="ea1ac572-6f71-49fe-aa19-d18a327331cf" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT1/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L3"/>
 			</TransformerWinding>
 			<TransformerWinding name="W2" type="PTW">
 				<Terminal esld:uuid="8c2e5c7b-86d2-4f6d-855d-a3b942c3f7cf" name="T1" connectivityNode="SS1/VL_10kV_PT1/Bay_PT1_MV_Incoming/L3" substationName="SS1" voltageLevelName="VL_10kV_PT1" bayName="Bay_PT1_MV_Incoming" cNodeName="L3"/>
@@ -12,16 +12,16 @@
 		</PowerTransformer>
 		<PowerTransformer name="PT2" type="PTR" esld:x="41" esld:y="25" esld:lx="42.5" esld:ly="25">
 			<TransformerWinding name="W1" type="PTW">
-				<Terminal esld:uuid="e9cb2c53-76ca-433e-af96-c590a0ca3f90" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT2/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L3"/>
+				<Terminal esld:uuid="e9cb2c53-76ca-433e-af96-c590a0ca3f90" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT2/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L3"/>
 			</TransformerWinding>
 			<TransformerWinding name="W2" type="PTW">
 				<Terminal esld:uuid="a5fe5e25-4664-4765-a33e-cae4b637c41e" name="T1" connectivityNode="SS1/VL_10kV_PT2/Bay_PT2_MV_Incoming/L1" substationName="SS1" voltageLevelName="VL_10kV_PT2" bayName="Bay_PT2_MV_Incoming" cNodeName="L1"/>
 			</TransformerWinding>
 		</PowerTransformer>
-		<VoltageLevel name="VL_50kV" nomFreq="50" numPhases="3" esld:w="68" esld:h="24" esld:x="1" esld:y="1" esld:lx="1" esld:ly="1">
-			<Voltage multiplier="k" unit="V">50</Voltage>
+		<VoltageLevel name="VL_110kV" nomFreq="50" numPhases="3" esld:w="68" esld:h="24" esld:x="1" esld:y="1" esld:lx="1" esld:ly="1">
+			<Voltage multiplier="k" unit="V">110</Voltage>
 			<Bay name="BB2" esld:w="57" esld:x="8" esld:y="15" esld:lx="5.5" esld:ly="16" esld:h="1">
-				<ConnectivityNode name="L" pathName="SS1/VL_50kV/BB2/L">
+				<ConnectivityNode name="L" pathName="SS1/VL_110kV/BB2/L">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section bus="true">
 							<esld:Vertex esld:x="8.5" esld:y="15.5"/>
@@ -67,7 +67,7 @@
 				</ConnectivityNode>
 			</Bay>
 			<Bay name="BB1" esld:w="57" esld:x="8" esld:y="13" esld:lx="5.5" esld:ly="14" esld:h="1">
-				<ConnectivityNode name="L" pathName="SS1/VL_50kV/BB1/L">
+				<ConnectivityNode name="L" pathName="SS1/VL_110kV/BB1/L">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section bus="true">
 							<esld:Vertex esld:x="8.5" esld:y="13.5"/>
@@ -114,32 +114,32 @@
 			</Bay>
 			<Bay name="Bay_Feed1" esld:x="8" esld:y="2" esld:lx="8" esld:ly="2" esld:w="9" esld:h="10">
 				<ConductingEquipment type="SAR" name="SAR1" esld:x="10" esld:y="4" esld:lx="11" esld:ly="5">
-					<Terminal esld:uuid="c0d691e0-0068-4b9e-b466-5c82e3a2dc50" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L4"/>
+					<Terminal esld:uuid="c0d691e0-0068-4b9e-b466-5c82e3a2dc50" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L4"/>
 				</ConductingEquipment>
 				<ConductingEquipment type="IFL" name="IFL1" esld:x="12" esld:y="2" esld:lx="13" esld:ly="3" esld:rot="2">
-					<Terminal esld:uuid="33919d4b-9d8c-4c37-9aa6-a0a18fde2f83" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L4"/>
+					<Terminal esld:uuid="33919d4b-9d8c-4c37-9aa6-a0a18fde2f83" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L4"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F1" type="DIS" esld:x="12" esld:y="4" esld:lx="13" esld:ly="5">
-					<Terminal esld:uuid="c45653bb-e5c5-4991-850f-2add4e7a1bf7" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L4"/>
-					<Terminal esld:uuid="b42ba980-1c8c-4e4c-b5e5-6fcca701a81d" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed1/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L1"/>
+					<Terminal esld:uuid="c45653bb-e5c5-4991-850f-2add4e7a1bf7" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L4"/>
+					<Terminal esld:uuid="b42ba980-1c8c-4e4c-b5e5-6fcca701a81d" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed1/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CTR_F1" type="CTR" esld:x="12" esld:y="6" esld:lx="13" esld:ly="7">
-					<Terminal esld:uuid="8543bc92-eef6-4241-a881-651082e493b7" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed1/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L2"/>
-					<Terminal esld:uuid="d122addf-7e23-4b45-995d-ba307f2b293e" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L1"/>
+					<Terminal esld:uuid="8543bc92-eef6-4241-a881-651082e493b7" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed1/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L2"/>
+					<Terminal esld:uuid="d122addf-7e23-4b45-995d-ba307f2b293e" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CBR_F1" type="CBR" esld:x="12" esld:y="8" esld:lx="13" esld:ly="9">
-					<Terminal esld:uuid="13ea9663-5405-47c4-b466-078f86ec3b35" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L3"/>
-					<Terminal esld:uuid="b7a0e336-2544-40a2-b0de-a28317d01c03" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L2"/>
+					<Terminal esld:uuid="13ea9663-5405-47c4-b466-078f86ec3b35" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L3"/>
+					<Terminal esld:uuid="b7a0e336-2544-40a2-b0de-a28317d01c03" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L2"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F1_B1" type="DIS" esld:x="11" esld:y="10" esld:lx="8.5" esld:ly="11">
-					<Terminal esld:uuid="f301703d-6ab6-422a-a49b-7528e254cf2e" name="T2" connectivityNode="SS1/VL_50kV/BB1/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB1" cNodeName="L"/>
-					<Terminal esld:uuid="c3b376e9-ac7e-461b-8a31-49f44b5d30e5" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L3"/>
+					<Terminal esld:uuid="f301703d-6ab6-422a-a49b-7528e254cf2e" name="T2" connectivityNode="SS1/VL_110kV/BB1/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB1" cNodeName="L"/>
+					<Terminal esld:uuid="c3b376e9-ac7e-461b-8a31-49f44b5d30e5" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L3"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F1_B2" type="DIS" esld:x="13" esld:y="10" esld:lx="14" esld:ly="11">
-					<Terminal esld:uuid="64043ad7-ca78-4fb6-8f4f-b7da9ee21844" name="T2" connectivityNode="SS1/VL_50kV/BB2/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB2" cNodeName="L"/>
-					<Terminal esld:uuid="5b858feb-0d07-494d-858c-d8a15061305d" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed1" cNodeName="L3"/>
+					<Terminal esld:uuid="64043ad7-ca78-4fb6-8f4f-b7da9ee21844" name="T2" connectivityNode="SS1/VL_110kV/BB2/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB2" cNodeName="L"/>
+					<Terminal esld:uuid="5b858feb-0d07-494d-858c-d8a15061305d" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed1/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed1" cNodeName="L3"/>
 				</ConductingEquipment>
-				<ConnectivityNode name="L4" pathName="SS1/VL_50kV/Bay_Feed1/L4">
+				<ConnectivityNode name="L4" pathName="SS1/VL_110kV/Bay_Feed1/L4">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="12.5" esld:y="2.84" esld:uuid="33919d4b-9d8c-4c37-9aa6-a0a18fde2f83"/>
@@ -156,7 +156,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L3" pathName="SS1/VL_50kV/Bay_Feed1/L3">
+				<ConnectivityNode name="L3" pathName="SS1/VL_110kV/Bay_Feed1/L3">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="13.5" esld:y="10.16" esld:uuid="5b858feb-0d07-494d-858c-d8a15061305d"/>
@@ -174,7 +174,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L2" pathName="SS1/VL_50kV/Bay_Feed1/L2">
+				<ConnectivityNode name="L2" pathName="SS1/VL_110kV/Bay_Feed1/L2">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="12.5" esld:y="6.84" esld:uuid="8543bc92-eef6-4241-a881-651082e493b7"/>
@@ -182,7 +182,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L1" pathName="SS1/VL_50kV/Bay_Feed1/L1">
+				<ConnectivityNode name="L1" pathName="SS1/VL_110kV/Bay_Feed1/L1">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="12.5" esld:y="4.84" esld:uuid="b42ba980-1c8c-4e4c-b5e5-6fcca701a81d"/>
@@ -193,32 +193,32 @@
 			</Bay>
 			<Bay name="Bay_Feed2" esld:x="18" esld:y="2" esld:lx="18" esld:ly="2" esld:w="9" esld:h="10">
 				<ConductingEquipment type="SAR" name="SAR1" esld:x="20" esld:y="4" esld:lx="21" esld:ly="5">
-					<Terminal esld:uuid="032e98a9-5a43-4a96-9581-0a1cb3ac0879" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L1"/>
+					<Terminal esld:uuid="032e98a9-5a43-4a96-9581-0a1cb3ac0879" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment type="IFL" name="IFL2" esld:x="22" esld:y="2" esld:lx="23" esld:ly="3" esld:rot="2">
-					<Terminal esld:uuid="432c5857-8310-4a79-ac2f-f9247801e31c" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L1"/>
+					<Terminal esld:uuid="432c5857-8310-4a79-ac2f-f9247801e31c" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F2" type="DIS" esld:x="22" esld:y="4" esld:lx="23" esld:ly="5">
-					<Terminal esld:uuid="f0acbd4c-9cac-4a8c-a95b-ff53ff57b416" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed2/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L2"/>
-					<Terminal esld:uuid="708adebc-8c83-404a-a604-03e76735bba7" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L1"/>
+					<Terminal esld:uuid="f0acbd4c-9cac-4a8c-a95b-ff53ff57b416" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed2/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L2"/>
+					<Terminal esld:uuid="708adebc-8c83-404a-a604-03e76735bba7" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CTR_F2" type="CTR" esld:x="22" esld:y="6" esld:lx="23" esld:ly="7">
-					<Terminal esld:uuid="8c75a7b0-ec30-4f8a-b68b-f50796f928a2" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed2/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L3"/>
-					<Terminal esld:uuid="d0727ca4-059e-488f-8109-75c135b2af43" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L2"/>
+					<Terminal esld:uuid="8c75a7b0-ec30-4f8a-b68b-f50796f928a2" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed2/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L3"/>
+					<Terminal esld:uuid="d0727ca4-059e-488f-8109-75c135b2af43" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L2"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CBR_F2" type="CBR" esld:x="22" esld:y="8" esld:lx="23" esld:ly="9">
-					<Terminal esld:uuid="a9847d00-f82f-4cb5-ad1a-548f847f9a22" name="T2" connectivityNode="SS1/VL_50kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L4"/>
-					<Terminal esld:uuid="aa48db86-949a-4642-8862-be3ce1c46f51" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L3"/>
+					<Terminal esld:uuid="a9847d00-f82f-4cb5-ad1a-548f847f9a22" name="T2" connectivityNode="SS1/VL_110kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L4"/>
+					<Terminal esld:uuid="aa48db86-949a-4642-8862-be3ce1c46f51" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L3"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F2_B1" type="DIS" esld:x="21" esld:y="10" esld:lx="18.5" esld:ly="11">
-					<Terminal esld:uuid="7d6b9ce7-3e29-4753-9bee-a7d7024a7df3" name="T2" connectivityNode="SS1/VL_50kV/BB1/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB1" cNodeName="L"/>
-					<Terminal esld:uuid="a974066a-d475-4fc0-b889-581e59293832" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L4"/>
+					<Terminal esld:uuid="7d6b9ce7-3e29-4753-9bee-a7d7024a7df3" name="T2" connectivityNode="SS1/VL_110kV/BB1/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB1" cNodeName="L"/>
+					<Terminal esld:uuid="a974066a-d475-4fc0-b889-581e59293832" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L4"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_F2_B2" type="DIS" esld:x="23" esld:y="10" esld:lx="24" esld:ly="11">
-					<Terminal esld:uuid="9ff9e493-4927-4fbc-bb0c-53ede0de840a" name="T2" connectivityNode="SS1/VL_50kV/BB2/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB2" cNodeName="L"/>
-					<Terminal esld:uuid="fa657821-8507-4bee-befd-585cce64e81c" name="T1" connectivityNode="SS1/VL_50kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_Feed2" cNodeName="L4"/>
+					<Terminal esld:uuid="9ff9e493-4927-4fbc-bb0c-53ede0de840a" name="T2" connectivityNode="SS1/VL_110kV/BB2/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB2" cNodeName="L"/>
+					<Terminal esld:uuid="fa657821-8507-4bee-befd-585cce64e81c" name="T1" connectivityNode="SS1/VL_110kV/Bay_Feed2/L4" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_Feed2" cNodeName="L4"/>
 				</ConductingEquipment>
-				<ConnectivityNode name="L4" pathName="SS1/VL_50kV/Bay_Feed2/L4">
+				<ConnectivityNode name="L4" pathName="SS1/VL_110kV/Bay_Feed2/L4">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="21.5" esld:y="10.16" esld:uuid="a974066a-d475-4fc0-b889-581e59293832"/>
@@ -236,7 +236,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L3" pathName="SS1/VL_50kV/Bay_Feed2/L3">
+				<ConnectivityNode name="L3" pathName="SS1/VL_110kV/Bay_Feed2/L3">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="22.5" esld:y="6.84" esld:uuid="8c75a7b0-ec30-4f8a-b68b-f50796f928a2"/>
@@ -244,7 +244,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L2" pathName="SS1/VL_50kV/Bay_Feed2/L2">
+				<ConnectivityNode name="L2" pathName="SS1/VL_110kV/Bay_Feed2/L2">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="22.5" esld:y="4.84" esld:uuid="f0acbd4c-9cac-4a8c-a95b-ff53ff57b416"/>
@@ -252,7 +252,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L1" pathName="SS1/VL_50kV/Bay_Feed2/L1">
+				<ConnectivityNode name="L1" pathName="SS1/VL_110kV/Bay_Feed2/L1">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="22.5" esld:y="2.84" esld:uuid="432c5857-8310-4a79-ac2f-f9247801e31c"/>
@@ -272,32 +272,32 @@
 			</Bay>
 			<Bay name="Bay_Busbar1" esld:x="3" esld:y="13" esld:lx="3" esld:ly="13" esld:w="62" esld:h="1">
 				<ConductingEquipment name="VTR_B1" type="VTR" esld:x="7" esld:y="13" esld:lx="7" esld:ly="15" esld:rot="1">
-					<Terminal esld:uuid="db2508d2-bf2f-47d5-aa65-dfed0290e141" name="T1" connectivityNode="SS1/VL_50kV/BB1/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB1" cNodeName="L"/>
+					<Terminal esld:uuid="db2508d2-bf2f-47d5-aa65-dfed0290e141" name="T1" connectivityNode="SS1/VL_110kV/BB1/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB1" cNodeName="L"/>
 				</ConductingEquipment>
 			</Bay>
 			<Bay name="Bay_Busbar2" esld:x="3" esld:y="15" esld:lx="3" esld:ly="17.5" esld:w="62" esld:h="1">
 				<ConductingEquipment type="VTR" name="VTR_B2" esld:x="7" esld:y="15" esld:lx="7" esld:ly="17" esld:rot="1">
-					<Terminal esld:uuid="02db15aa-549f-4300-9a3b-f5d94d92b8b8" name="T1" connectivityNode="SS1/VL_50kV/BB2/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB2" cNodeName="L"/>
+					<Terminal esld:uuid="02db15aa-549f-4300-9a3b-f5d94d92b8b8" name="T1" connectivityNode="SS1/VL_110kV/BB2/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB2" cNodeName="L"/>
 				</ConductingEquipment>
 			</Bay>
 			<Bay xmlns="http://www.iec.ch/61850/2003/SCL" name="Bay_PT1" esld:x="28" xmlns:esld="https://transpower.co.nz/SCL/SSD/SLD/v0" esld:y="17" esld:lx="28" esld:ly="17" esld:w="8" esld:h="7">
 				<ConductingEquipment name="CTR_PT1" type="CTR" esld:x="32" esld:y="22" esld:lx="33" esld:ly="23">
-					<Terminal esld:uuid="a469286e-2577-4e68-abc0-dea4fb0a6e37" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT1/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L3"/>
-					<Terminal esld:uuid="27e9a550-621e-48d1-99f4-e8afa2df56ac" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT1/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L2"/>
+					<Terminal esld:uuid="a469286e-2577-4e68-abc0-dea4fb0a6e37" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT1/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L3"/>
+					<Terminal esld:uuid="27e9a550-621e-48d1-99f4-e8afa2df56ac" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT1/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L2"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CBR_PT1" type="CBR" esld:x="32" esld:y="20" esld:lx="33" esld:ly="21">
-					<Terminal esld:uuid="42f748cb-5c61-4f93-b2d3-f406d1a505de" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT1/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L2"/>
-					<Terminal esld:uuid="b010d0ad-65e4-487a-94e0-ee604ae52934" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L1"/>
+					<Terminal esld:uuid="42f748cb-5c61-4f93-b2d3-f406d1a505de" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT1/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L2"/>
+					<Terminal esld:uuid="b010d0ad-65e4-487a-94e0-ee604ae52934" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_PT1_B1" type="DIS" esld:x="31" esld:y="18" esld:lx="28.5" esld:ly="19">
-					<Terminal esld:uuid="56b98e94-771a-4ccd-bf8e-033d12326780" name="T1" connectivityNode="SS1/VL_50kV/BB1/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB1" cNodeName="L"/>
-					<Terminal esld:uuid="c62586d7-94b6-4ea9-bbc7-7bf9c61cdd2c" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L1"/>
+					<Terminal esld:uuid="56b98e94-771a-4ccd-bf8e-033d12326780" name="T1" connectivityNode="SS1/VL_110kV/BB1/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB1" cNodeName="L"/>
+					<Terminal esld:uuid="c62586d7-94b6-4ea9-bbc7-7bf9c61cdd2c" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="DIS_PT1_B2" type="DIS" esld:x="33" esld:y="18" esld:lx="34" esld:ly="19">
-					<Terminal esld:uuid="79e2a905-c383-4565-9e1b-68a49665497c" name="T1" connectivityNode="SS1/VL_50kV/BB2/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB2" cNodeName="L"/>
-					<Terminal esld:uuid="d764c504-5824-4728-925d-d66ddeb941d6" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT1" cNodeName="L1"/>
+					<Terminal esld:uuid="79e2a905-c383-4565-9e1b-68a49665497c" name="T1" connectivityNode="SS1/VL_110kV/BB2/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB2" cNodeName="L"/>
+					<Terminal esld:uuid="d764c504-5824-4728-925d-d66ddeb941d6" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT1/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT1" cNodeName="L1"/>
 				</ConductingEquipment>
-				<ConnectivityNode name="L3" pathName="SS1/VL_50kV/Bay_PT1/L3">
+				<ConnectivityNode name="L3" pathName="SS1/VL_110kV/Bay_PT1/L3">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="32.5" esld:y="24.8" esld:uuid="ea1ac572-6f71-49fe-aa19-d18a327331cf"/>
@@ -305,7 +305,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L2" pathName="SS1/VL_50kV/Bay_PT1/L2">
+				<ConnectivityNode name="L2" pathName="SS1/VL_110kV/Bay_PT1/L2">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="32.5" esld:y="20.84" esld:uuid="42f748cb-5c61-4f93-b2d3-f406d1a505de"/>
@@ -313,7 +313,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L1" pathName="SS1/VL_50kV/Bay_PT1/L1">
+				<ConnectivityNode name="L1" pathName="SS1/VL_110kV/Bay_PT1/L1">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="31.5" esld:y="18.84" esld:uuid="c62586d7-94b6-4ea9-bbc7-7bf9c61cdd2c"/>
@@ -334,22 +334,22 @@
 			</Bay>
 			<Bay xmlns="http://www.iec.ch/61850/2003/SCL" name="Bay_PT2" esld:x="38" xmlns:esld="https://transpower.co.nz/SCL/SSD/SLD/v0" esld:y="17" esld:lx="38" esld:ly="17" esld:w="8" esld:h="7">
 				<ConductingEquipment type="DIS" name="DIS_PT2_B2" esld:x="42" esld:y="18" esld:lx="43" esld:ly="19">
-					<Terminal esld:uuid="39812065-a0d8-403c-b747-c6a29dcc2386" name="T1" connectivityNode="SS1/VL_50kV/BB2/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB2" cNodeName="L"/>
-					<Terminal esld:uuid="4e891b49-65ec-410c-97fa-b75b3f07df42" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L1"/>
+					<Terminal esld:uuid="39812065-a0d8-403c-b747-c6a29dcc2386" name="T1" connectivityNode="SS1/VL_110kV/BB2/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB2" cNodeName="L"/>
+					<Terminal esld:uuid="4e891b49-65ec-410c-97fa-b75b3f07df42" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment type="DIS" name="DIS_PT2_B1" esld:x="40" esld:y="18" esld:lx="37.5" esld:ly="19">
-					<Terminal esld:uuid="c97e5175-5090-45a1-a72c-fd86fbd36c1a" name="T1" connectivityNode="SS1/VL_50kV/BB1/L" substationName="SS1" voltageLevelName="VL_50kV" bayName="BB1" cNodeName="L"/>
-					<Terminal esld:uuid="89379edb-16e8-4e99-addf-136a4c449b6d" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L1"/>
+					<Terminal esld:uuid="c97e5175-5090-45a1-a72c-fd86fbd36c1a" name="T1" connectivityNode="SS1/VL_110kV/BB1/L" substationName="SS1" voltageLevelName="VL_110kV" bayName="BB1" cNodeName="L"/>
+					<Terminal esld:uuid="89379edb-16e8-4e99-addf-136a4c449b6d" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment type="CBR" name="CBR_PT2" esld:x="41" esld:y="20" esld:lx="42" esld:ly="21">
-					<Terminal esld:uuid="e2618923-6714-49ba-a144-81e2d2cd39e3" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT2/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L2"/>
-					<Terminal esld:uuid="7ff23123-03ee-4ca5-b504-41371aa92ab5" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L1"/>
+					<Terminal esld:uuid="e2618923-6714-49ba-a144-81e2d2cd39e3" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT2/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L2"/>
+					<Terminal esld:uuid="7ff23123-03ee-4ca5-b504-41371aa92ab5" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT2/L1" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L1"/>
 				</ConductingEquipment>
 				<ConductingEquipment name="CTR_PT2" type="CTR" esld:x="41" esld:y="22" esld:lx="42" esld:ly="23">
-					<Terminal esld:uuid="494586ee-b986-43f7-ae20-a08c7fb7eaca" name="T2" connectivityNode="SS1/VL_50kV/Bay_PT2/L3" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L3"/>
-					<Terminal esld:uuid="0c7c7e18-c9dc-42cb-be5b-0c30bb069987" name="T1" connectivityNode="SS1/VL_50kV/Bay_PT2/L2" substationName="SS1" voltageLevelName="VL_50kV" bayName="Bay_PT2" cNodeName="L2"/>
+					<Terminal esld:uuid="494586ee-b986-43f7-ae20-a08c7fb7eaca" name="T2" connectivityNode="SS1/VL_110kV/Bay_PT2/L3" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L3"/>
+					<Terminal esld:uuid="0c7c7e18-c9dc-42cb-be5b-0c30bb069987" name="T1" connectivityNode="SS1/VL_110kV/Bay_PT2/L2" substationName="SS1" voltageLevelName="VL_110kV" bayName="Bay_PT2" cNodeName="L2"/>
 				</ConductingEquipment>
-				<ConnectivityNode name="L3" pathName="SS1/VL_50kV/Bay_PT2/L3">
+				<ConnectivityNode name="L3" pathName="SS1/VL_110kV/Bay_PT2/L3">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="41.5" esld:y="24.8" esld:uuid="e9cb2c53-76ca-433e-af96-c590a0ca3f90"/>
@@ -357,7 +357,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L2" pathName="SS1/VL_50kV/Bay_PT2/L2">
+				<ConnectivityNode name="L2" pathName="SS1/VL_110kV/Bay_PT2/L2">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="41.5" esld:y="20.84" esld:uuid="e2618923-6714-49ba-a144-81e2d2cd39e3"/>
@@ -365,7 +365,7 @@
 						</esld:Section>
 					</Private>
 				</ConnectivityNode>
-				<ConnectivityNode name="L1" pathName="SS1/VL_50kV/Bay_PT2/L1">
+				<ConnectivityNode name="L1" pathName="SS1/VL_110kV/Bay_PT2/L1">
 					<Private type="Transpower-SLD-Vertices">
 						<esld:Section>
 							<esld:Vertex esld:x="40.5" esld:y="18.84" esld:uuid="89379edb-16e8-4e99-addf-136a4c449b6d"/>

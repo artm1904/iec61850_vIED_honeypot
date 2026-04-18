@@ -1,6 +1,6 @@
-.subckt PTR A1 B1 C1 A2 B2 C2 inductor1=69 inductor2=25 coupling=1
-* transformer 4:1 turns ratio specified by 8:0.5 inductance ratio (16:1), coupling is ideal (1)
-* transformer 5:3 turns ratio specified by 1.38:0.5 inductance ratio (2.778:1), coupling is ideal (1)
+.subckt PTR A1 B1 C1 A2 B2 C2 inductor1=3025 inductor2=25 coupling=1
+* transformer 11:1 turns ratio specified by 3025:25 inductance ratio (121:1), coupling is ideal (1)
+* 110/10 kV step-down transformer
 l1pri A1 i1 {inductor1}
 l2pri B1 i1 {inductor1}
 l3pri C1 i1 {inductor1} 
