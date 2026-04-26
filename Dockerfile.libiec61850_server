@@ -33,13 +33,13 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 
 
 # --- ДОБАВЛЯЕМ BEELZEBUB ---
-COPY --from=custom-beelzebub /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=custom-beelzebub /opt/beelzebub /opt/beelzebub
+COPY --from=llm_honeypot-beelzebub /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=llm_honeypot-beelzebub /opt/beelzebub /opt/beelzebub
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 22 80 2222 8080
+EXPOSE 80 2222
 
 ENTRYPOINT ["/entrypoint.sh"]
 
